@@ -14,6 +14,7 @@ así que también se aceptan los nombres cortos de la plantilla antigua
 Las carátulas pueden venir como URL o como imagen pegada en la fila (imagen
 flotante anclada a la celda o imagen "dentro de la celda" de Excel 365). Las
 imágenes pegadas se guardan en `bulk_tmp/` hasta que se confirma la importación.
+Toda carátula importada se reduce a 600 px de ancho y se guarda en WebP.
 
 La importación se hace por tandas de pocos segundos (la página encadena las
 tandas sola) para que un archivo de miles de filas con carátulas por URL no
@@ -91,6 +92,8 @@ SESSION_KEY = 'bulk_rows'
 TMP_DIR = 'bulk_tmp'
 MAX_ROWS = 5000
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
+COVER_MAX_WIDTH = 600  # las carátulas se guardan a este ancho máximo, en WebP
+COVER_QUALITY = 82
 IMPORT_TIME_BUDGET = 12  # segundos por tanda de importación
 IMPORT_BATCH = 24        # filas por sub-tanda (carátulas descargadas en paralelo)
 TITLE_MAX = Juego._meta.get_field('title').max_length
@@ -407,6 +410,26 @@ def _validate(raw, present):
     }
 
 
+def _web_image(blob):
+    """Reduce la carátula a COVER_MAX_WIDTH px de ancho (sin agrandarla, manteniendo
+    la proporción) y la convierte a WebP. Si algo falla se guarda la original."""
+    try:
+        from PIL import Image, ImageOps
+        img = Image.open(io.BytesIO(blob))
+        if img.format == 'JPEG':
+            img.draft('RGB', (COVER_MAX_WIDTH, COVER_MAX_WIDTH * 4))
+        img = ImageOps.exif_transpose(img)
+        img = img.convert('RGBA' if img.mode in ('RGBA', 'LA', 'P', 'PA') else 'RGB')
+        if img.width > COVER_MAX_WIDTH:
+            img = img.resize((COVER_MAX_WIDTH, max(1, round(img.height * COVER_MAX_WIDTH / img.width))),
+                             Image.LANCZOS)
+        out = io.BytesIO()
+        img.save(out, 'WEBP', quality=COVER_QUALITY, method=4)
+        return ContentFile(out.getvalue(), name='import.webp')
+    except Exception:  # noqa: BLE001
+        return ContentFile(blob, name=f'import.{_sniff_image(blob) or "jpg"}')
+
+
 def _store_tmp_image(blob):
     if not blob or len(blob) > MAX_IMAGE_BYTES:
         return ''
@@ -545,10 +568,9 @@ def _fetch_image(url):
     except requests.RequestException as e:
         return None, f'no se pudo descargar la carátula ({e.__class__.__name__})'
     blob = b''.join(chunks)
-    ext = _sniff_image(blob)
-    if not ext:
+    if not _sniff_image(blob):
         return None, 'la URL de la carátula no apunta a una imagen'
-    return ContentFile(blob, name=f'import.{ext}'), None
+    return _web_image(blob), None
 
 
 def _tmp_image(path):
@@ -557,7 +579,7 @@ def _tmp_image(path):
             blob = fh.read()
     except Exception:  # noqa: BLE001
         return None, 'no se encontró la imagen pegada (vuelve a subir el archivo)'
-    return ContentFile(blob, name=f'import{posixpath.splitext(path)[1]}'), None
+    return _web_image(blob), None
 
 
 def _cover_for(r):

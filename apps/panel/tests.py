@@ -178,3 +178,17 @@ class BulkFlowTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self._upload(SimpleUploadedFile('plantilla.xlsx', resp.content))
         self.assertEqual(self.client.session[pb.SESSION_KEY]['rows'][0]['err'], '')
+
+
+class CoverResizeTests(TestCase):
+    def test_large_cover_is_reduced_to_webp(self):
+        buf = io.BytesIO()
+        Image.new('RGB', (1800, 2400), (10, 120, 200)).save(buf, 'PNG')
+        content = pb._web_image(buf.getvalue())
+        self.assertTrue(content.name.endswith('.webp'))
+        img = Image.open(io.BytesIO(content.read()))
+        self.assertEqual((img.format, img.size), ('WEBP', (600, 800)))
+
+    def test_small_cover_is_not_enlarged(self):
+        img = Image.open(io.BytesIO(pb._web_image(_png()).read()))
+        self.assertEqual(img.size, (20, 30))
