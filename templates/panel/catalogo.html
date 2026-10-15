@@ -1,0 +1,45 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Catálogo" style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+    <form method="get" style="flex:1 1 240px;max-width:360px;margin:0;display:flex">
+      {% for f in plat_filters %}{% if f.on and f.label != 'Todos' %}<input type="hidden" name="plat" value="{{ f.label }}">{% endif %}{% endfor %}
+      <input name="q" value="{{ q }}" placeholder="Buscar juego" style="flex:1;width:100%;height:40px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px;outline:none">
+    </form>
+    <div style="display:flex;gap:2px;padding:3px;background:#fff;border:1px solid #E6DED2;border-radius:4px">
+      {% for f in plat_filters %}
+        <a href="{{ f.url }}" style="border:0;cursor:pointer;height:32px;padding:0 12px;border-radius:2px;font-size:13px;font-weight:700;background:{% if f.on %}#011E4F{% else %}transparent{% endif %};color:{% if f.on %}#FCF8F3{% else %}#4A5A78{% endif %};display:flex;align-items:center">{{ f.label }}</a>
+      {% endfor %}
+    </div>
+    <div style="flex:1"></div>
+    <span style="font-size:13px;color:#4A5A78">{{ count }} juegos</span>
+    <a href="{{ new_url }}" style="height:40px;padding:0 16px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center">+ Nuevo juego</a>
+  </div>
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
+    <div style="min-width:1000px">
+      <div style="display:grid;grid-template-columns:44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 60px;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+        <div></div><div>Juego</div><div>Plat.</div><div>Género</div><div style="text-align:right">Primaria</div><div style="text-align:right">Secundaria</div><div style="text-align:right">Antes</div><div>Estado</div><div></div>
+      </div>
+      {% for g in rows %}
+        <div style="display:grid;grid-template-columns:44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 60px;gap:12px;padding:10px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px;opacity:{% if g.active %}1{% else %}.55{% endif %}">
+          <div style="width:36px;aspect-ratio:3/4;border-radius:3px;{{ g.cover_bg }}"></div>
+          <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.title }}</div>
+          <div style="font-size:12px;font-weight:800">{{ g.plat }}</div>
+          <div style="font-size:13px;color:#4A5A78">{{ g.genre }}</div>
+          <div style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ g.prim }}</div>
+          <div style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ g.sec }}</div>
+          <div style="text-align:right;color:#4A5A78;font-variant-numeric:tabular-nums">{{ g.old }}</div>
+          <form method="post" action="{% url 'gsadmin:dashboard_toggle_juego' g.pk %}" style="margin:0">{% csrf_token %}
+            <button type="submit" style="display:flex;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;padding:0;font-size:13px;font-weight:600">
+              <span style="width:34px;height:20px;border-radius:999px;background:{% if g.active %}#011E4F{% else %}#CFC6B8{% endif %};position:relative;flex-shrink:0"><span style="position:absolute;top:2px;left:{% if g.active %}16px{% else %}2px{% endif %};width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s"></span></span>{% if g.active %}Activo{% else %}Oculto{% endif %}
+            </button>
+          </form>
+          <a href="{{ g.edit_url }}" style="font-size:13px;font-weight:700;text-align:right">Editar</a>
+        </div>
+      {% empty %}
+        <div style="padding:28px 16px;border-top:1px solid #EFE8DD;font-size:14px;color:#4A5A78;text-align:center">No hay juegos con esos filtros.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

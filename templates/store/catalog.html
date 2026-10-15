@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ catalog_title }} · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Catálogo" data-catalog="1" data-plat="{{ f_plat }}" data-genre="{{ f_genre }}" data-sort="{{ f_sort }}" data-deals="{% if f_deals %}1{% endif %}" style="max-width:1200px;margin:0 auto;padding:0 var(--pad);width:100%">
+  <div class="gj-m" data-deals-banner="1" {% if not f_deals %}hidden{% endif %} style="margin:0 -16px;padding:12px 16px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font:italic 900 22px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Ofertas</span><span style="font-size:13px;font-weight:700"><span data-result-count="1">{{ result_count }}</span> juegos con descuento</span></div>
+  <div class="gj-d" style="display:flex;align-items:baseline;gap:16px;padding:40px 0 24px">
+    <h1 data-catalog-title="1" style="margin:0;font:italic 900 48px/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase">{{ catalog_title }}</h1>
+    <span style="font-size:14px;font-weight:600;color:#A9B8D6"><span data-result-count="1">{{ result_count }}</span> juegos</span>
+  </div>
+  <div style="position:sticky;top:var(--headerH);z-index:10;background:#011E4F;margin:0 calc(-1 * var(--pad));padding:12px var(--pad);display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-bottom:1px solid rgba(252,248,243,.1)">
+    <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px">
+      {% for p in plats %}
+        <button type="button" data-f-plat="{{ p }}" style="border:0;cursor:pointer;height:34px;padding:0 12px;border-radius:2px;font-weight:700;font-size:13px;background:{% if p == f_plat %}#FCF8F3{% else %}transparent{% endif %};color:{% if p == f_plat %}#011E4F{% else %}#C9D4E8{% endif %}">{{ p }}</button>
+      {% endfor %}
+    </div>
+    <input class="gj-d" data-f-query="1" value="{{ f_query }}" placeholder="Buscar en el catálogo" autocomplete="off" style="flex:1;min-width:200px;height:40px;padding:0 14px;border:0;border-radius:4px;background:#FCF8F3;color:#011E4F;font-size:14px;outline:none">
+    <div class="gj-m" style="flex:1"></div>
+    <select data-f-sort="1" aria-label="Ordenar" style="height:40px;max-width:118px;min-width:0;padding:0 6px;border:1px solid rgba(252,248,243,.25);border-radius:4px;background:#011E4F;color:#FCF8F3;font-size:13px;font-weight:600;cursor:pointer">
+      {% for s in sorts %}<option{% if s == f_sort %} selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <div class="gj-m gj-noscroll" style="flex-basis:100%;display:flex;gap:6px;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none">
+      {% for gn in genres %}
+        <button type="button" data-f-genre="{{ gn }}" data-chip="1" style="flex-shrink:0;height:32px;padding:0 12px;border:1px solid {% if gn == f_genre and not f_deals %}#FC8B01{% else %}rgba(252,248,243,.25){% endif %};background:{% if gn == f_genre and not f_deals %}#FC8B01{% else %}transparent{% endif %};color:{% if gn == f_genre and not f_deals %}#011E4F{% else %}#FCF8F3{% endif %};border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">{{ gn }}</button>
+      {% endfor %}
+      <button type="button" data-f-onlydeals="1" data-chip="1" style="flex-shrink:0;height:32px;padding:0 12px;border:1px solid {% if f_deals %}#FC8B01{% else %}rgba(252,248,243,.25){% endif %};background:{% if f_deals %}#FC8B01{% else %}transparent{% endif %};color:{% if f_deals %}#011E4F{% else %}#FCF8F3{% endif %};border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Solo ofertas</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:32px;padding:20px 0 48px;align-items:flex-start">
+    <aside class="gj-d" style="width:200px;flex-shrink:0;position:sticky;top:160px;display:flex;flex-direction:column;gap:2px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6;margin-bottom:8px">Género</div>
+      {% for gn in genres %}
+        <button type="button" data-f-genre="{{ gn }}" data-side="1" class="hv-y" style="text-align:left;border:0;border-left:3px solid {% if gn == f_genre and not f_deals %}#FC8B01{% else %}transparent{% endif %};background:transparent;color:{% if gn == f_genre and not f_deals %}#FCC602{% else %}#FCF8F3{% endif %};padding:8px 12px;font-size:14px;font-weight:{% if gn == f_genre and not f_deals %}700{% else %}500{% endif %};cursor:pointer">{{ gn }}</button>
+      {% endfor %}
+      <button type="button" data-f-onlydeals="1" data-side="1" class="hv-y" style="text-align:left;border:0;border-left:3px solid {% if f_deals %}#FC8B01{% else %}transparent{% endif %};background:transparent;color:{% if f_deals %}#FCC602{% else %}#FCF8F3{% endif %};padding:8px 12px;font-size:14px;font-weight:{% if f_deals %}700{% else %}500{% endif %};cursor:pointer">Solo ofertas</button>
+    </aside>
+    <div style="flex:1;min-width:0">
+      <div data-no-results="1" {% if result_count %}hidden{% endif %} style="padding:48px 0;text-align:center;color:#C9D4E8">No encontramos juegos con esos filtros. <a href="{% url 'store:catalog' %}" data-clear-filters="1" style="font-weight:700">Limpiar filtros</a></div>
+      <div data-grid="1" data-reveal-stagger="1" data-restagger="init" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+        {% for g in games %}{% include "partials/game_card.html" with grid=1 %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

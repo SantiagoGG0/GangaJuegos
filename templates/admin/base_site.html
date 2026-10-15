@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Ganga Juegos Panel{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="icon" type="image/png" href="{% static 'img/ganga-icon.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/admin-theme.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'gsadmin:dashboard_resumen' %}" style="display:flex;align-items:center;gap:10px;">
+  <img src="{% static 'img/ganga-icon.png' %}" alt="" style="width:30px;height:30px;object-fit:contain">
+  <span>Ganga <span style="color:#FC8B01">Juegos</span> · Panel</span>
+</a></div>
+{% if user.is_active and user.is_staff %}<a class="gjp-back" href="{% url 'gsadmin:dashboard_resumen' %}">← Volver al panel</a>{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

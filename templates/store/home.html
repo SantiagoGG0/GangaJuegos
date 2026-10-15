@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block content %}
+<main data-page="1" data-screen-label="Home" style="display:flex;flex-direction:column;gap:var(--secGap);padding-bottom:var(--secGap)">
+  <section data-spotlight="1" style="position:relative;z-index:4;border-bottom:1px solid rgba(252,248,243,.1)">
+    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+      <div data-pixels="1" style="position:absolute;inset:0"></div>
+      <div style="position:absolute;inset:0;background:radial-gradient(520px circle at var(--mx,80%) var(--my,25%),rgba(252,95,1,.22),transparent 62%)"></div>
+    </div>
+    <div data-float="1" style="position:absolute;top:24px;right:var(--pad);display:grid;grid-template-columns:repeat(3,14px);gap:6px;opacity:.9;z-index:1">
+      <span style="width:14px;height:14px;background:#FCC602;border-radius:2px;grid-column:3"></span>
+      <span style="width:14px;height:14px;background:#FC8B01;border-radius:2px;grid-column:2"></span>
+      <span style="width:14px;height:14px;background:#FC5F01;border-radius:2px;grid-column:1;grid-row:3"></span>
+      <span style="width:14px;height:14px;background:#FC3C00;border-radius:2px;grid-column:2;grid-row:3"></span>
+    </div>
+    <div style="position:relative;z-index:3;max-width:1200px;margin:0 auto;padding:var(--heroTop) var(--pad) var(--heroBottom);display:flex;flex-wrap:wrap;gap:32px;align-items:center">
+      <div data-reveal-stagger="1" style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FCC602"><span style="width:24px;height:4px;background:#FCC602;transform:skewX(-20deg)"></span>Tienda digital PS4 · PS5</div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#C9D4E8;order:-1"><span style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(37,211,102,.14);color:#7EF0AE"><span style="width:7px;height:7px;border-radius:50%;background:#25D366;box-shadow:0 0 0 3px rgba(37,211,102,.25)"></span>Entrega 5–15 min</span><span><span style="color:#FCC602;letter-spacing:1px">★★★★★</span> {{ review_rating }} · {{ review_count }} reseñas</span></div>
+        <h1 style="margin:0;font:italic 900 var(--h1)/0.92 'Archivo',sans-serif;font-stretch:115%;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance"><span data-line="0" style="display:inline-block;padding-right:.08em">Juega más.</span><br><span data-line="1" data-shimmer="1" style="display:inline-block;padding-right:.1em;background:linear-gradient(90deg,#FC3C00,#FC8B01,#FCC602,#FC8B01,#FC3C00);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent">Paga una ganga.</span></h1>
+        <p style="margin:0;font-size:16px;line-height:24px;color:#C9D4E8;max-width:440px;text-wrap:pretty">Cuentas originales con garantía de un año, precios en primaria y secundaria, y soporte por WhatsApp.</p>
+        <div style="position:relative;max-width:500px">
+          <form action="{% url 'store:catalog' %}" method="get" data-suggest-form="1" style="display:flex;background:#FCF8F3;border-radius:4px;padding:4px;margin:0">
+            <input name="q" data-suggest-input="1" autocomplete="off" placeholder="¿Qué quieres jugar hoy?" style="flex:1;min-width:0;height:48px;padding:0 12px;border:0;background:transparent;color:#011E4F;font-size:16px;outline:none">
+            <button type="submit" style="height:48px;padding:0 20px;border:0;border-radius:2px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Buscar</button>
+          </form>
+          <div data-suggest-box="1" data-suggest-plat="1" data-enter="drop" hidden style="position:absolute;left:0;right:0;top:64px;z-index:20;max-height:320px;overflow-y:auto;background:#FCF8F3;color:#011E4F;border-radius:8px;padding:4px;box-shadow:0 16px 40px -12px rgba(0,0,0,.5);z-index:5"></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <a href="{% url 'store:catalog' %}?platform=PS5" class="hv-chip" style="height:36px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCF8F3">PS5</a>
+          <a href="{% url 'store:catalog' %}?platform=PS4" class="hv-chip" style="height:36px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCF8F3">PS4</a>
+          <a href="{% url 'store:plus' %}" class="hv-chip" style="height:36px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCF8F3">PS Plus</a>
+          <a href="{% url 'store:giftcards' %}" class="hv-chip" style="height:36px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCF8F3">Gift cards</a>
+        </div>
+      </div>
+      {% if slide0 %}
+      <div data-reveal="scale" data-delay="250" style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <a href="{{ slide0.url }}" data-hero-card="1" data-tilt="5" data-swap="{{ slide0.title }}" style="display:block;position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;cursor:pointer;background:repeating-linear-gradient(135deg,#0A2B66 0 10px,#082558 10px 20px);color:#FCF8F3">
+          <div data-hero-media="1" style="position:absolute;inset:0">
+            {% if slide0.video %}<video class="gj-hero-video" src="{{ slide0.video }}" {% if slide0.image %}poster="{{ slide0.image }}"{% endif %} autoplay muted loop playsinline preload="metadata"></video>
+            {% elif slide0.image %}<div style="position:absolute;inset:0;background:url('{{ slide0.image }}') center/cover no-repeat"></div>
+            {% else %}<div style="position:absolute;top:14px;left:14px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8FA3C7">Tráiler en loop · video 16:10</div>{% endif %}
+          </div>
+          <div data-hero-disc="1" {% if not slide0.disc %}hidden{% endif %} style="position:absolute;top:12px;right:-6px;padding:8px 18px 8px 14px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 22px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ slide0.disc }}</div>
+          <div style="position:absolute;inset:auto 0 0 0;padding:56px 16px 16px;background:linear-gradient(transparent,rgba(1,20,55,.95));display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+            <div style="min-width:0">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#FCC602"><span data-hero-plat="1">{{ slide0.plat }}</span> · Destacado</div>
+              <div data-hero-title="1" style="font:italic 900 24px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase;margin-top:6px">{{ slide0.title }}</div>
+              <div style="font-size:14px;color:#C9D4E8;margin-top:6px">Desde <strong data-hero-from="1" style="color:#FCF8F3;font-weight:800">{{ slide0.from }}</strong></div>
+            </div>
+            <span style="flex-shrink:0;width:44px;height:44px;border-radius:4px;background:#FCF8F3;color:#011E4F;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center">→</span>
+          </div>
+        </a>
+        <div data-hero-dots="1" style="display:flex;gap:6px">
+          {% for s in slides %}
+            <button type="button" data-hero-dot="{{ forloop.counter0 }}" aria-label="Destacado" style="flex:1;height:4px;border:0;background:rgba(252,248,243,.2);cursor:pointer;padding:0;transform:skewX(-20deg);position:relative;overflow:hidden">{% if forloop.first %}<span data-progress="s0" data-duration="5000" style="position:absolute;inset:0;background:#FC8B01;transform-origin:0 50%"></span>{% endif %}</button>
+          {% endfor %}
+        </div>
+        <script type="application/json" id="gj-slides">{{ slides_json|safe }}</script>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if deals %}
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+      <h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FC5F01;transform:skewX(-14deg)"></span>Ofertas de la semana</h2>
+      <a href="{% url 'store:deals' %}" style="font-size:14px;font-weight:700;white-space:nowrap">Ver todas →</a>
+    </div>
+    <div data-reveal="fade" style="overflow:hidden;margin:0 calc(-1 * var(--pad));-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)">
+      <div data-marquee="1" style="display:flex;width:max-content;padding:6px 0 14px">
+        {% for g in deals %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}
+        {% for g in deals %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if cf0 %}
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+      <h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FCC602;transform:skewX(-14deg)"></span>Top de la semana</h2>
+      <div style="display:flex;gap:6px">
+        <button type="button" data-cf-prev="1" aria-label="Anterior" class="hv-chip" style="width:40px;height:40px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;cursor:pointer;font-size:18px;font-weight:800">←</button>
+        <button type="button" data-cf-next="1" aria-label="Siguiente" class="hv-chip" style="width:40px;height:40px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;cursor:pointer;font-size:18px;font-weight:800">→</button>
+      </div>
+    </div>
+    <div data-cf="1" data-reveal="fade" style="position:relative;height:var(--cfH);perspective:1200px;touch-action:pan-y;user-select:none">
+      {% for c in coverflow %}
+        <div data-cf-item="{{ forloop.counter0 }}" style="position:absolute;left:50%;top:0;width:var(--cfW);margin-left:var(--cfML);aspect-ratio:3/4;border-radius:8px;{{ c.cover }};transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .8s,filter .8s;cursor:pointer;box-shadow:0 30px 60px -20px rgba(0,0,0,.7);-webkit-box-reflect:below 6px linear-gradient(transparent 72%,rgba(255,255,255,.16))">
+          {% if not c.hasCover %}<div class="gj-cover-label">{{ c.initials }}</div>{% endif %}
+          {% if c.disc %}<span style="position:absolute;top:10px;right:-4px;padding:5px 10px 5px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 13px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ c.disc }}</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div data-cf-info="1" data-swap="{{ cf0.title }}" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 28px;text-align:center">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#FCC602">#<span data-cf-rank="1">{{ cf0.rank }}</span> · <span data-cf-plat="1">{{ cf0.plat }}</span></div>
+        <div data-cf-title="1" style="font:italic 900 24px/1.1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase;margin-top:4px">{{ cf0.title }}</div>
+        <div style="font-size:14px;color:#C9D4E8;margin-top:4px">Desde <strong data-cf-from="1" style="color:#FCF8F3">{{ cf0.from }}</strong></div>
+      </div>
+      <a href="{{ cf0.url }}" data-cf-link="1" data-magnetic="1" style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center">Ver juego</a>
+    </div>
+    <script type="application/json" id="gj-cf">{{ cf_json|safe }}</script>
+  </section>
+  {% endif %}
+
+  <section data-reveal-stagger="1" style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+    {% for c in cats %}
+      <a href="{{ c.url }}" data-tilt="4" class="hv-navy" style="position:relative;overflow:hidden;padding:20px;border-radius:8px;background:#0A2B66;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;min-height:120px;cursor:pointer;color:#FCF8F3">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:{{ c.bar }}"></div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">{{ c.kicker }}</div>
+          <div style="font:italic 900 26px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;margin-top:8px">{{ c.title }}</div>
+          <div style="font-size:14px;color:#C9D4E8;margin-top:6px">{{ c.desc }}</div>
+        </div>
+        <span style="font-size:22px;font-weight:800;color:#FC8B01">→</span>
+      </a>
+    {% endfor %}
+  </section>
+
+  {% if top %}
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+      <h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FCC602;transform:skewX(-14deg)"></span>Más vendidos</h2>
+      <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px">
+        <button type="button" data-top-pick="Todos" style="border:0;cursor:pointer;height:32px;padding:0 12px;border-radius:2px;font-weight:700;font-size:13px;background:#FCF8F3;color:#011E4F">Todos</button>
+        <button type="button" data-top-pick="PS5" style="border:0;cursor:pointer;height:32px;padding:0 12px;border-radius:2px;font-weight:700;font-size:13px;background:transparent;color:#C9D4E8">PS5</button>
+        <button type="button" data-top-pick="PS4" style="border:0;cursor:pointer;height:32px;padding:0 12px;border-radius:2px;font-weight:700;font-size:13px;background:transparent;color:#C9D4E8">PS4</button>
+      </div>
+    </div>
+    <div data-reveal="fade" data-top-wrap="1" style="overflow:hidden;margin:0 calc(-1 * var(--pad));-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)">
+      <div data-marquee="1" style="display:flex;width:max-content;padding:6px 0 14px">
+        {% for g in top %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}
+        {% for g in top %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}
+      </div>
+    </div>
+    <template data-top="Todos">{% for g in top %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}{% for g in top %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}</template>
+    <template data-top="PS5">{% for g in top_ps5 %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}{% for g in top_ps5 %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}</template>
+    <template data-top="PS4">{% for g in top_ps4 %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}{% for g in top_ps4 %}{% include "partials/game_card.html" with rail=1 %}{% endfor %}</template>
+  </section>
+  {% endif %}
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:rgba(252,248,243,.12);border-radius:8px;overflow:hidden">
+      {% for st in stats %}
+        <div style="background:#011E4F;padding:20px 16px;display:flex;flex-direction:column;gap:6px">
+          <div data-count="{{ st.n }}" data-prefix="{{ st.pre }}" style="font:italic 900 34px/1 'Archivo',sans-serif;font-stretch:112%;background:linear-gradient(180deg,#FCC602,#FC5F01);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em">{{ st.v }}</div>
+          <div style="font-size:13px;font-weight:600;color:#C9D4E8">{{ st.l }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if genre_tiles %}
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-direction:column;gap:16px">
+    <h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FC5F01;transform:skewX(-14deg)"></span>Explora por género</h2>
+    <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--genreMin),1fr));gap:8px">
+      {% for g in genre_tiles %}
+        <a href="{% url 'store:catalog' %}?genre={{ g.label|urlencode }}" data-tilt="6" class="hv-navy" style="position:relative;overflow:hidden;text-align:left;border:0;cursor:pointer;padding:16px;min-height:96px;border-radius:8px;background:#0A2B66;color:#FCF8F3;display:flex;flex-direction:column;justify-content:space-between;gap:12px">
+          <span style="position:absolute;right:-12px;bottom:-16px;width:64px;height:64px;background:{{ g.color }};transform:rotate(18deg);border-radius:6px"></span>
+          <span style="position:absolute;right:42px;bottom:20px;width:10px;height:10px;background:{{ g.color }};border-radius:2px;opacity:.7"></span>
+          <span style="position:relative;font:italic 900 18px/1.05 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase">{{ g.label }}</span>
+          <span style="position:relative;font-size:12px;font-weight:600;color:#A9B8D6">{{ g.count }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:rgba(252,248,243,.12);border-radius:8px;overflow:hidden">
+      {% for st in steps %}
+        <div style="background:#011E4F;padding:20px;display:flex;gap:16px;align-items:flex-start">
+          <div style="font:italic 900 40px/0.9 'Archivo',sans-serif;font-stretch:115%;background:linear-gradient(180deg,#FCC602,#FC5F01);-webkit-background-clip:text;background-clip:text;color:transparent">{{ st.n }}</div>
+          <div>
+            <div style="font-size:16px;font-weight:800">{{ st.title }}</div>
+            <div style="font-size:14px;line-height:20px;color:#C9D4E8;margin-top:4px">{{ st.desc }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:20px">
+    <div style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FCC602">Lo que dicen nuestros clientes</div><h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FC8B01;transform:skewX(-14deg)"></span>Miles de entregas y contando</h2></div>
+      {% if instagram_url %}<a href="{{ instagram_url }}" target="_blank" rel="noopener" style="font-size:14px;font-weight:700">Ver en Instagram →</a>{% endif %}
+    </div>
+    <div style="overflow:hidden;white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)">
+      <div data-marquee="1" style="display:inline-flex;align-items:stretch;padding:4px 0">
+        {% for i in "12" %}{% for r in reviews %}<div style="flex-shrink:0;width:300px;margin-right:12px;padding:18px;border-radius:8px;background:#0A2B66;display:flex;flex-direction:column;gap:10px;white-space:normal">
+            <div style="color:#FCC602;letter-spacing:2px;font-size:14px">★★★★★</div>
+            <div style="font-size:14px;line-height:21px;color:#E6ECF7;flex:1">“{{ r.text }}”</div>
+            <div style="font-size:12px;font-weight:700;color:#FC8B01">@{{ r.name|cut:"@" }}</div>
+          </div>{% endfor %}{% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+    <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FCC602">Preguntas frecuentes</div><h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FC5F01;transform:skewX(-14deg)"></span>Lo que más preguntan</h2>
+      <a href="{% url 'store:help' %}" style="font-size:14px;font-weight:700">¿Problemas con tu compra? Habla con soporte →</a>
+    </div>
+    <div data-reveal-stagger="1" data-faq="1" style="flex:2 1 460px;min-width:0;border-top:1px solid rgba(252,248,243,.15)">
+      {% for q in home_faqs %}{% include "partials/faq_item.html" with pad="16px" %}{% endfor %}
+    </div>
+  </section>
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div data-reveal="scale" data-spotlight="1" style="position:relative;overflow:hidden;padding:24px;border-radius:8px;background:#0A2B66;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(400px circle at var(--mx,85%) var(--my,50%),rgba(37,211,102,.22),transparent 65%)"></div>
+      <div style="position:relative;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7EF0AE">Canal de WhatsApp</div>
+        <div style="font:italic 900 26px/1.05 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Súmate al canal y entérate antes</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:#C9D4E8"><span>✓ Ofertas relámpago exclusivas</span><span>✓ Cupones de descuento</span><span>✓ Avisos de títulos nuevos</span></div>
+      </div>
+      <a href="{{ whatsapp_channel_link }}" target="_blank" rel="noopener" data-magnetic="1" style="position:relative;height:48px;padding:0 22px;border-radius:4px;background:#25D366;color:#011E4F;display:flex;align-items:center;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;white-space:nowrap">Unirme al canal</a>
+    </div>
+  </section>
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div data-reveal="fade" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:20px 32px;padding:20px;border:1px solid rgba(252,248,243,.12);border-radius:8px">
+      <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">Vendemos en {{ country_count }} países</div>
+        <div data-reveal-stagger="1" data-reveal="scale" style="display:flex;flex-wrap:wrap;gap:10px 16px">
+          {% for c in currencies %}
+            <span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="width:22px;height:15px;border-radius:2px;background:{{ c.flag }};box-shadow:0 0 0 1px rgba(252,248,243,.25)"></span>{{ c.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="flex:0 1 auto;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">Paga como prefieras</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:13px;font-weight:700;padding:7px 10px;border-radius:4px;background:#0A2B66">Mercado Pago</span><span style="font-size:13px;font-weight:700;padding:7px 10px;border-radius:4px;background:#0A2B66">PayPal</span><span style="font-size:13px;font-weight:700;padding:7px 10px;border-radius:4px;background:#0A2B66">WhatsApp</span><span style="font-size:13px;font-weight:700;padding:7px 10px;border-radius:4px;background:#0A2B66">PSE · Nequi · Efecty</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1200px;width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div data-reveal="scale" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:24px;border-radius:8px;background:linear-gradient(120deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F">
+      <div style="flex:1 1 260px">
+        <div style="font:italic 900 22px/1.05 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase">¿Primaria o secundaria?</div>
+        <div style="font-size:14px;line-height:20px;margin-top:6px">Un asesor te ayuda a elegir por WhatsApp y te acompaña en la instalación.</div>
+      </div>
+      <a href="{{ whatsapp_advisor_link }}" target="_blank" rel="noopener" data-magnetic="1" style="height:48px;padding:0 20px;border:0;border-radius:4px;background:#011E4F;color:#FCF8F3;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:#25D366;box-shadow:0 0 0 3px rgba(37,211,102,.25)"></span>Escribir por WhatsApp</a>
+    </div>
+  </section>
+</main>
+{% endblock %}

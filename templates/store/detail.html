@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ game.title }} · {{ game.plat }} · Ganga Juegos{% endblock %}
+{% block description %}{{ game.title }} para {{ game.plat }}: cuenta primaria {{ game.prim }} o secundaria {{ game.sec }}. Entrega en minutos y garantía de 1 año.{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Detalle" data-detail="1" data-id="{{ game.pk }}" style="max-width:1200px;margin:0 auto;padding:0 var(--pad);width:100%">
+  <form method="post" action="{% url 'orders:cart_add' %}" data-add-form="1" hidden>{% csrf_token %}<input type="hidden" name="type" value="juego"><input type="hidden" name="id" value="{{ game.pk }}"><input type="hidden" name="acc" value="primaria" data-acc-input="1"><input type="hidden" name="next" value=""></form>
+  <div style="padding:16px 0;font-size:13px;color:#A9B8D6;display:flex;gap:8px;min-width:0"><a href="{% url 'store:catalog' %}" style="flex-shrink:0">Catálogo</a><span>/</span><span style="color:#FCF8F3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ game.title }}</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start;padding-bottom:40px">
+    <div class="gj-d" style="width:360px;flex-shrink:0;position:sticky;top:96px;display:flex;flex-direction:column;gap:12px">
+      <div data-fly-img="1" data-tilt="6" style="position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;{{ game.cover_bg }}">
+        {% if not game.has_cover %}<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(1,30,79,.4)">{{ game.initials }}</div>{% endif %}
+        {% if game.has_disc %}<span style="position:absolute;top:16px;right:-6px;padding:8px 18px 8px 14px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 24px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ game.disc }}</span>{% endif %}
+      </div>
+    </div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;gap:16px;align-items:flex-end">
+        <div class="gj-m" data-fly-img="1" style="position:relative;width:108px;flex-shrink:0;aspect-ratio:3/4;border-radius:6px;{{ game.cover_bg }}">
+          {% if game.has_disc %}<span style="position:absolute;top:6px;right:-4px;padding:4px 8px 4px 6px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 12px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ game.disc }}</span>{% endif %}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FCC602">{{ game.plat }} · {{ game.genre }}</div>
+          <h1 style="margin:0;font:italic 900 var(--detailH1)/0.95 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;text-wrap:balance">{{ game.title }}</h1>
+          <div style="font-size:14px;color:#C9D4E8">Cuenta original · entrega por WhatsApp o correo</div>
+        </div>
+      </div>
+
+      <section style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px;font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase"><span style="width:5px;height:18px;background:#FC5F01;transform:skewX(-14deg)"></span>1 · Elige tu cuenta</div>
+        <div data-reveal-stagger="1" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          {% for a in accounts %}
+            {% with on=forloop.first %}
+            <button type="button" data-acc="{{ a.id }}" data-price="{{ a.price }}" aria-pressed="{% if on %}true{% else %}false{% endif %}" style="position:relative;overflow:hidden;text-align:left;cursor:pointer;padding:16px 14px 14px;border-radius:8px;border:2px solid {% if on %}#FC8B01{% else %}rgba(252,248,243,.15){% endif %};background:{% if on %}#FCF8F3{% else %}#0A2B66{% endif %};color:{% if on %}#011E4F{% else %}#FCF8F3{% endif %};display:flex;flex-direction:column;gap:8px;min-width:0;transition:all .15s">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <span style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">{{ a.name }}</span>
+                <span data-acc-dot="1" style="width:20px;height:20px;border-radius:50%;border:2px solid {% if on %}#011E4F{% else %}rgba(252,248,243,.4){% endif %};background:{% if on %}#011E4F{% else %}transparent{% endif %};flex-shrink:0;display:flex;align-items:center;justify-content:center"><span data-acc-inner="1" style="width:8px;height:8px;border-radius:50%;background:{% if on %}#FCF8F3{% else %}transparent{% endif %}"></span></span>
+              </div>
+              <div style="font:italic 900 24px/1 'Archivo',sans-serif;font-variant-numeric:tabular-nums">{{ a.price }}</div>
+              <div data-acc-sub="1" style="font-size:13px;line-height:18px;color:{% if on %}#4A5A78{% else %}#C9D4E8{% endif %};text-wrap:pretty">{{ a.sum }}</div>
+              <span style="align-self:flex-start;font-size:11px;font-weight:800;padding:4px 8px;background:{{ a.tag_bg }};color:#011E4F;transform:skewX(-10deg)">{{ a.tag }}</span>
+            </button>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </section>
+
+      <section style="border-radius:8px;background:#FCF8F3;color:#011E4F;overflow:hidden">
+        <div style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">
+          <div style="padding:12px 14px;color:#4A5A78">¿Qué cambia?</div>
+          <div data-col-head="primaria" style="padding:12px 10px;transition:background .35s;background:#FCC602">Primaria</div>
+          <div data-col-head="secundaria" style="padding:12px 10px;transition:background .35s;background:transparent">Secundaria</div>
+        </div>
+        {% for r in compare %}
+          <div style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);border-top:1px solid #E6DED2;font-size:13px;line-height:18px">
+            <div style="padding:12px 14px;color:#4A5A78">{{ r.label }}</div>
+            <div data-col="primaria" style="padding:12px 10px;transition:background .35s;background:#FFEFC7;font-weight:700;display:flex;gap:6px;align-items:flex-start"><span style="width:8px;height:8px;margin-top:5px;flex-shrink:0;background:{% if r.p_ok %}#1FA35A{% else %}#FC5F01{% endif %};transform:rotate(45deg)"></span>{{ r.p }}</div>
+            <div data-col="secundaria" style="padding:12px 10px;transition:background .35s;background:transparent;font-weight:700;display:flex;gap:6px;align-items:flex-start"><span style="width:8px;height:8px;margin-top:5px;flex-shrink:0;background:{% if r.s_ok %}#1FA35A{% else %}#FC5F01{% endif %};transform:rotate(45deg)"></span>{{ r.s }}</div>
+          </div>
+        {% endfor %}
+        <div style="border-top:1px solid #E6DED2;padding:14px;font-size:13px;line-height:19px;color:#011E4F"><strong>¿Cuál me conviene?</strong> Si tu consola siempre está conectada y quieres ahorrar, elige secundaria. Si quieres jugar desde tu usuario o sin internet, elige primaria.</div>
+      </section>
+
+      <div class="gj-d" style="display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:8px;background:#0A2B66">
+        <div style="display:flex;align-items:center;gap:10px;font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase"><span style="width:5px;height:18px;background:#FCC602;transform:skewX(-14deg)"></span>2 · Compra</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span data-sel-name="1" style="font-size:14px;color:#C9D4E8">Cuenta primaria</span><span data-sel-price="1" data-pop="{{ game.prim }}" style="font:italic 900 32px/1 'Archivo',sans-serif">{{ game.prim }}</span></div>
+        <div style="display:flex;gap:10px">
+          <button type="button" data-add-cart="1" data-fly="1" data-magnetic="1" style="flex:1;height:52px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 16px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Agregar al carrito</button>
+          <button type="button" data-buy-now="1" style="flex:1;height:52px;border:1px solid rgba(252,248,243,.4);border-radius:4px;background:transparent;font:italic 800 16px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Comprar ahora</button>
+        </div>
+        <div style="font-size:12px;color:#A9B8D6">Entrega en minutos · Garantía de 1 año</div>
+      </div>
+    </div>
+  </div>
+
+  {% if related %}
+  <section style="display:flex;flex-direction:column;gap:16px;padding-bottom:40px">
+    <h2 style="margin:0;font:italic 900 22px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">También te puede gustar</h2>
+    <div data-reveal-stagger="1" class="gj-noscroll" style="display:grid;grid-auto-flow:column;grid-auto-columns:var(--railCol);gap:12px;overflow-x:auto;margin:0 calc(-1 * var(--pad));padding:4px var(--pad) 12px;scrollbar-width:none">
+      {% for g in related %}
+        <a href="{{ g.url }}" class="hv-ring" data-tilt="10" style="cursor:pointer;display:flex;flex-direction:column;min-width:0;background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s">
+          <div style="position:relative;aspect-ratio:3/4;{{ g.cover_bg }}">
+            {% if not g.has_cover %}<div class="gj-cover-label">{{ g.initials }}</div>{% endif %}
+            {% if g.has_disc %}<span style="position:absolute;top:8px;right:-4px;padding:5px 10px 5px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 13px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ g.disc }}</span>{% endif %}
+          </div>
+          <div style="padding:10px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:14px;line-height:18px;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px">{{ g.title }}</div>
+            <div style="font-size:15px;font-weight:900">Desde {{ g.from }}</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="gj-m" style="position:sticky;bottom:0;z-index:20;margin:0 -16px;padding:12px 16px 16px;background:rgba(10,43,102,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(252,248,243,.12);display:flex;align-items:center;gap:12px">
+    <div style="flex-shrink:0">
+      <div data-sel-short="1" style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">Primaria</div>
+      <div data-sel-price="1" data-pop="{{ game.prim }}" style="font:italic 900 20px/1.1 'Archivo',sans-serif">{{ game.prim }}</div>
+    </div>
+    <button type="button" data-add-cart="1" data-fly="1" style="flex:1;height:48px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Agregar al carrito</button>
+  </div>
+</main>
+{% endblock %}

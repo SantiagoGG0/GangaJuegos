@@ -1,0 +1,49 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Cupones" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+  <div style="flex:1 1 560px;min-width:0;background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
+    <div style="min-width:620px">
+      <div style="display:grid;grid-template-columns:1.3fr 1fr 1.4fr 1fr 110px;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+        <div>Código</div><div>Descuento</div><div>Usos</div><div>Vence</div><div>Estado</div>
+      </div>
+      {% for c in rows %}
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1.4fr 1fr 110px;gap:12px;padding:14px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px">
+          <div style="font:italic 900 16px/1 'Archivo',sans-serif;letter-spacing:.04em">{{ c.code }}</div>
+          <div style="font-weight:700">{{ c.val }}</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:13px;color:#4A5A78">{{ c.usage }}</div>
+            <div style="height:4px;border-radius:999px;background:#EFE8DD;overflow:hidden"><div style="height:100%;width:{{ c.pct_w }};background:#FC8B01"></div></div>
+          </div>
+          <div style="font-size:13px;color:#4A5A78">{{ c.ends }}</div>
+          <form method="post" action="{% url 'gsadmin:dashboard_coupon_toggle' c.pk %}" style="margin:0">{% csrf_token %}
+            <button type="submit" style="display:flex;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;padding:0;font-size:13px;font-weight:600">
+              <span style="width:34px;height:20px;border-radius:999px;background:{% if c.on %}#011E4F{% else %}#CFC6B8{% endif %};position:relative;flex-shrink:0"><span style="position:absolute;top:2px;left:{% if c.on %}16px{% else %}2px{% endif %};width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s"></span></span>{{ c.state }}
+            </button>
+          </form>
+        </div>
+      {% empty %}
+        <div style="padding:28px 16px;border-top:1px solid #EFE8DD;font-size:14px;color:#4A5A78;text-align:center">Aún no hay cupones.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <form method="post" action="{% url 'gsadmin:dashboard_coupon_create' %}" style="flex:0 1 320px;min-width:280px;background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;margin:0">
+    {% csrf_token %}
+    <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Nuevo cupón</div>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Código</span>
+      <input name="code" value="{{ form.code }}" required placeholder="Ej. HALLOWEEN15" data-upper="1" style="height:42px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px;font-weight:700;text-transform:uppercase;outline:none">
+    </label>
+    <div style="display:flex;gap:10px">
+      <label style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Tipo</span>
+        <select name="tipo" style="height:42px;padding:0 8px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px"><option value="%"{% if form.tipo == '%' %} selected{% endif %}>Porcentaje</option><option value="$"{% if form.tipo == '$' %} selected{% endif %}>Monto fijo</option></select>
+      </label>
+      <label style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Valor</span>
+        <input name="valor" value="{{ form.valor }}" required inputmode="numeric" style="height:42px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px;outline:none">
+      </label>
+    </div>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Máximo de usos</span>
+      <input name="max" value="{{ form.max }}" placeholder="Sin límite" inputmode="numeric" style="height:42px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px;outline:none">
+    </label>
+    <button type="submit" style="height:46px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Crear cupón</button>
+  </form>
+</div>
+{% endblock %}

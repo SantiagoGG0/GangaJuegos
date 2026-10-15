@@ -1,0 +1,75 @@
+/* Re-skin del admin nativo de Django ("Administración avanzada", login,
+   formularios de edición) con la paleta del panel de Ganga Juegos:
+   azul marino #011E4F, crema #F4EFE7 / #FCF8F3, naranja #FC5F01–#FC8B01,
+   amarillo #FCC602 y tipografía Archivo. Django expone su tema vía
+   variables CSS, así que basta con redefinirlas. */
+:root, html[data-theme="light"], html[data-theme="dark"] {
+  --primary: #011E4F;
+  --primary-fg: #FCF8F3;
+  --secondary: #0A2B66;
+  --accent: #FC8B01;
+
+  --body-fg: #011E4F;
+  --body-bg: #F4EFE7;
+  --body-quiet-color: #4A5A78;
+  --body-medium-color: #4A5A78;
+  --body-loud-color: #011E4F;
+
+  --header-color: #FCF8F3;
+  --header-branding-color: #FCF8F3;
+  --header-bg: #011E4F;
+  --header-link-color: #FCC602;
+
+  --breadcrumbs-fg: #C9D4E8;
+  --breadcrumbs-link-fg: #FCC602;
+  --breadcrumbs-bg: #0A2B66;
+
+  --link-fg: #C93000;
+  --link-hover-color: #011E4F;
+  --link-selected-fg: #C93000;
+
+  --hairline-color: #EFE8DD;
+  --border-color: #E6DED2;
+
+  --error-fg: #9A2A00;
+  --message-success-bg: #D7F5E3;
+  --message-warning-bg: #FFF0C2;
+  --message-error-bg: #FFE1D6;
+
+  --darkened-bg: #FCF8F3;
+  --selected-bg: #FFF0C2;
+  --selected-row: #FFF8E1;
+
+  --button-fg: #011E4F;
+  --button-bg: #FC8B01;
+  --button-hover-bg: #FCC602;
+  --default-button-bg: #011E4F;
+  --default-button-hover-bg: #0A2B66;
+  --close-button-bg: #4A5A78;
+  --close-button-hover-bg: #011E4F;
+  --delete-button-bg: #C93000;
+  --delete-button-hover-bg: #9A2A00;
+
+  --object-tools-fg: #011E4F;
+  --object-tools-bg: #FCC602;
+  --object-tools-hover-bg: #FC8B01;
+
+  --font-family-primary: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+body { -webkit-font-smoothing: antialiased; }
+#header { box-shadow: 0 2px 0 0 #FC8B01; }
+#site-name, #site-name a { font: italic 900 18px/1 'Archivo', sans-serif; font-stretch: 112%; text-transform: uppercase; letter-spacing: 0; }
+#content h1, .module h2, .module caption, .inline-group h2 { font-family: 'Archivo', sans-serif; }
+#content h1 { font-style: italic; font-weight: 900; text-transform: uppercase; color: #011E4F; }
+.module h2, .module caption, .inline-group h2 { background: #011E4F; color: #FCF8F3; }
+.module, .inline-group, fieldset.module { border-radius: 8px; overflow: hidden; }
+input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], input[type=tel], textarea, select, .vTextField {
+  border: 1px solid #E6DED2; border-radius: 4px; background: #fff; color: #011E4F;
+}
+input[type=submit], .button, .submit-row input, a.button { border-radius: 4px; font-weight: 700; }
+.submit-row input.default, input[type=submit].default { background: linear-gradient(90deg, #FC3C00, #FC8B01 60%, #FCC602); color: #011E4F; }
+#changelist-filter h2 { background: #0A2B66; color: #FCF8F3; }
+.login #header { justify-content: center; }
+.login #container { border-radius: 8px; overflow: hidden; border: 1px solid #E6DED2; }
+.gjp-back { display: inline-flex; align-items: center; gap: 6px; margin-left: 16px; color: #FCC602 !important; font-weight: 700; }

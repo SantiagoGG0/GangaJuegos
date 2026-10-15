@@ -1,0 +1,75 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · Ganga Juegos Panel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="{% static 'img/ganga-icon.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4EFE7;color:#011E4F;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#C93000;text-decoration:none;cursor:pointer}a:hover{color:#011E4F}
+input,select,button{font:inherit;color:inherit}
+input::placeholder{color:#6B7891}
+[hidden]{display:none !important}
+.hv-tab:hover{background:#0A2B66 !important}
+form.gj-contents{display:contents}
+@media (max-width: 860px){
+  .gjp-wrap{flex-direction:column}
+  .gjp-side{position:static !important;width:100% !important;height:auto !important}
+  .gjp-side nav{flex-direction:row !important;overflow-x:auto;flex:none !important}
+  .gjp-side nav a{white-space:nowrap}
+  .gjp-main{padding:20px 16px 48px !important}
+}
+</style>
+</head>
+<body>
+<div class="gjp-wrap" style="min-height:100vh;display:flex">
+  <aside class="gjp-side" style="width:232px;flex-shrink:0;background:#011E4F;color:#FCF8F3;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <a href="{% url 'gsadmin:dashboard_resumen' %}" style="display:flex;align-items:center;gap:10px;padding:20px 18px 18px;border-bottom:1px solid rgba(252,248,243,.1);color:#FCF8F3">
+      <img src="{% static 'img/ganga-icon.png' %}" alt="" style="width:36px;height:36px;object-fit:contain">
+      <div>
+        <div style="font:italic 900 16px/0.9 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Ganga <span style="color:#FC8B01">Juegos</span></div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A9B8D6;margin-top:4px">Panel</div>
+      </div>
+    </a>
+    <nav style="display:flex;flex-direction:column;padding:12px 10px;gap:2px;flex:1;overflow:auto">
+      {% for t in tabs %}
+        <a href="{{ t.url }}" class="hv-tab" style="display:flex;align-items:center;gap:10px;text-align:left;border:0;cursor:pointer;padding:10px 12px;border-radius:4px;font-size:14px;font-weight:{% if t.on %}700{% else %}500{% endif %};background:{% if t.on %}#0A2B66{% else %}transparent{% endif %};color:{% if t.on %}#FCF8F3{% else %}#C9D4E8{% endif %}">
+          <span style="width:4px;height:16px;background:{% if t.on %}#FC8B01{% else %}transparent{% endif %};transform:skewX(-14deg)"></span>{{ t.label }}
+          {% if t.badge %}<span style="margin-left:auto;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:#FC8B01;color:#011E4F">{{ t.badge }}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </nav>
+    <div style="padding:14px 18px;border-top:1px solid rgba(252,248,243,.1);display:flex;flex-direction:column;gap:6px;font-size:13px">
+      <a href="{% url 'store:home' %}" style="color:#FCC602;font-weight:700">Ver tienda →</a>
+      <a href="{% url 'gsadmin:models_index' %}" style="color:#C9D4E8;font-weight:600">Administración avanzada →</a>
+      <span style="color:#A9B8D6">{{ admin_who }}</span>
+      <a href="{% url 'gsadmin:logout' %}" data-logout="1" style="color:#A9B8D6">Cerrar sesión</a>
+    </div>
+  </aside>
+
+  <main class="gjp-main" style="flex:1;min-width:0;padding:28px 32px 56px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C93000">{{ kicker }}</div>
+        <h1 style="margin:6px 0 0;font:italic 900 34px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">{{ title }}</h1>
+      </div>
+      <div style="font-size:13px;color:#4A5A78">{{ today_label }} · Base de precios en COP</div>
+    </div>
+    {% if messages %}
+      {% for m in messages %}
+        <div style="padding:12px 16px;border-radius:4px;font-size:14px;font-weight:600;background:{% if m.level_tag == 'error' %}#FFE1D6{% else %}#D7F5E3{% endif %};color:{% if m.level_tag == 'error' %}#9A2A00{% else %}#0B5D33{% endif %}">{{ m.message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block panel %}{% endblock %}
+  </main>
+</div>
+<form method="post" action="{% url 'gsadmin:logout' %}" id="gjp-logout" hidden>{% csrf_token %}</form>
+<script src="{% static 'js/ganga-panel.js' %}"></script>
+</body>
+</html>

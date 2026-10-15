@@ -1,0 +1,35 @@
+{% load static %}
+<footer style="background:#FCF8F3;color:#011E4F">
+  <div style="max-width:1200px;margin:0 auto;padding:36px var(--pad) 20px;display:flex;flex-direction:column;gap:28px">
+    <div style="display:flex;flex-wrap:wrap;gap:28px 40px">
+      <div style="flex:1 1 240px;display:flex;flex-direction:column;gap:10px">
+        <img src="{% static 'img/ganga-logo.png' %}" alt="Ganga Juegos · Tienda digital de videojuegos" style="height:72px;width:auto;align-self:flex-start;margin:-10px 0 -6px -6px">
+        <div style="font-size:14px;line-height:21px;color:#4A5A78;max-width:300px">Cuentas digitales originales para PS4 y PS5, con entrega en minutos y garantía de 1 año. Atención de 10 a 20 h, todos los días.</div>
+      </div>
+      <div style="flex:1 1 140px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Catálogo</div>
+        <a href="{% url 'store:catalog' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Todos los juegos</a>
+        <a href="{% url 'store:deals' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Ofertas</a>
+        <a href="{% url 'store:combos' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Combos</a>
+      </div>
+      <div style="flex:1 1 140px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Suscripciones</div>
+        <a href="{% url 'store:plus' %}" class="hv-red" style="font-size:14px;color:#4A5A78">PlayStation Plus</a>
+        <a href="{% url 'store:giftcards' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Gift Cards PSN</a>
+      </div>
+      <div style="flex:1 1 140px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Ayuda</div>
+        <a href="{% url 'store:help' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Soporte por WhatsApp</a>
+        <a href="{% url 'store:help' %}#faq" class="hv-red" style="font-size:14px;color:#4A5A78">Preguntas frecuentes</a>
+        <a href="{% url 'store:help' %}#faq" class="hv-red" style="font-size:14px;color:#4A5A78">Garantía</a>
+        {% if support_email %}<a href="mailto:{{ support_email }}" class="hv-red" style="font-size:14px;color:#4A5A78">{{ support_email }}</a>{% endif %}
+      </div>
+      <div style="flex:1 1 140px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Legal</div>
+        <a href="{% url 'store:terms' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Términos y condiciones</a>
+        <a href="{% url 'store:privacy' %}" class="hv-red" style="font-size:14px;color:#4A5A78">Política de privacidad</a>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;padding-top:16px;border-top:1px solid #E6DED2;font-size:13px;color:#4A5A78"><span>© {% now "Y" %} Ganga Juegos</span><span>Atención de 10 a 20 h · todos los días</span></div>
+  </div>
+</footer>

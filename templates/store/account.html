@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Mi cuenta" data-account="1" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FCC602"><span style="width:24px;height:4px;background:#FCC602;transform:skewX(-20deg)"></span>Mi cuenta</div>
+      <h1 style="margin:0;font:italic 900 var(--detailH1)/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase">Hola, {{ user.nombre|default:user.email }}</h1>
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#C9D4E8">{{ user.email }}{% if acc_country %} · <span style="width:20px;height:14px;border-radius:2px;background:{{ acc_country.flag }}"></span>{{ acc_country.name }}{% endif %}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      {% if is_admin %}<a href="/admin/" style="height:40px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCC602">Panel admin →</a>{% endif %}
+      <a href="{% url 'store:logout' %}" style="height:40px;padding:0 14px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;color:#FCF8F3">Cerrar sesión</a>
+    </div>
+  </div>
+  <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+    <div style="padding:18px;border-radius:8px;background:#FCF8F3;color:#011E4F;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Saldo a favor</div>
+      <div style="font:italic 900 30px/1 'Archivo',sans-serif">{{ balance }}</div>
+      <div style="font-size:13px;color:#4A5A78">Se descuenta en tu próxima compra.</div>
+    </div>
+    <div style="padding:18px;border-radius:8px;background:#0A2B66;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#A9B8D6">Tu código de referido</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:italic 900 26px/1 'Archivo',sans-serif;letter-spacing:.04em;color:#FCC602;min-width:0;overflow-wrap:anywhere">{{ ref_code }}</span><button type="button" data-copy="{{ ref_code }}" data-copied="Copiado ✓" style="height:34px;padding:0 12px;border:0;border-radius:4px;background:#FCF8F3;color:#011E4F;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Copiar</button></div>
+      <div style="font-size:13px;color:#C9D4E8">Compártelo y gana saldo a favor.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">
+    <a href="?tab=pedidos" data-acc-tab="pedidos" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'pedidos' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'pedidos' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Pedidos</a>
+    <a href="?tab=datos" data-acc-tab="datos" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'datos' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'datos' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Mis datos</a>
+  </div>
+  {% if tab == 'pedidos' %}
+    <div data-reveal-stagger="1" style="display:flex;flex-direction:column;gap:8px">
+      {% for o in orders %}
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:14px 16px;border-radius:8px;background:#0A2B66">
+          <div style="flex:1 1 220px;min-width:0">
+            <div style="font-size:12px;color:#A9B8D6"><strong style="color:#FCF8F3">{{ o.id }}</strong> · {{ o.date }}</div>
+            <div style="font-size:15px;font-weight:700;margin-top:4px">{{ o.title }}</div>
+            <div style="font-size:13px;color:#C9D4E8">{{ o.sub }}</div>
+          </div>
+          <span style="font-size:12px;font-weight:800;padding:5px 10px;border-radius:4px;background:{{ o.st_bg }};color:#011E4F;white-space:nowrap">{{ o.st }}</span>
+          <div style="font-weight:900;font-size:16px;min-width:96px;text-align:right;white-space:nowrap">{{ o.total }}</div>
+          {% if o.delivered and o.creds %}
+            <button type="button" data-creds-toggle="1" style="height:36px;padding:0 12px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Ver datos de acceso</button>
+            <div data-creds="1" data-enter="drop" hidden style="flex-basis:100%;display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:6px;background:#FCF8F3;color:#011E4F">
+              {% for c in o.creds %}<div><div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">{{ c.title }}</div><div style="font-size:14px;line-height:21px;white-space:pre-wrap;font-variant-numeric:tabular-nums">{{ c.text }}</div></div>{% endfor %}
+            </div>
+          {% else %}
+            <a href="{{ o.wa_link }}" target="_blank" rel="noopener" style="height:36px;padding:0 12px;border:1px solid rgba(252,248,243,.25);background:transparent;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;color:#FCF8F3">{% if o.delivered %}Ver datos de acceso{% else %}Ver estado{% endif %}</a>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div style="padding:48px 24px;border:1px dashed rgba(252,248,243,.25);border-radius:8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div style="font:italic 900 22px/1 'Archivo',sans-serif;text-transform:uppercase">Aún no tienes pedidos</div>
+          <div style="font-size:14px;color:#C9D4E8">Explora el catálogo y encuentra tu próximo juego.</div>
+          <a href="{% url 'store:catalog' %}" data-magnetic="1" style="height:48px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center">Ir al catálogo</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <form method="post" action="?tab=datos" style="background:#FCF8F3;color:#011E4F;border-radius:8px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:760px;margin:0">
+      {% csrf_token %}<input type="hidden" name="action" value="save_profile">
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Nombre</span><input type="text" name="nombre" value="{{ user.nombre }}" placeholder="Tu nombre" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Correo</span><input type="email" name="email" value="{{ user.email }}" placeholder="tu@correo.com" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">WhatsApp</span><input type="tel" name="whatsapp" value="{{ user.whatsapp }}" placeholder="300 000 0000" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">País</span>
+        <select name="country" style="height:44px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;cursor:pointer">
+          {% for co in countries %}<option value="{{ co.code }}"{% if acc_country and co.code == acc_country.code %} selected{% endif %}>{{ co.name }} ({{ co.iso }})</option>{% endfor %}
+        </select>
+      </label>
+      {% if profile_error %}<div style="grid-column:1/-1;font-size:12px;font-weight:600;color:#B42318">{{ profile_error }}</div>{% elif acc_msg %}<div data-enter="drop" style="grid-column:1/-1;font-size:12px;font-weight:600;color:#0B7A43">{{ acc_msg }}</div>{% endif %}
+      <button type="submit" style="grid-column:1/-1;justify-self:start;height:48px;padding:0 24px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Guardar cambios</button>
+    </form>
+  {% endif %}
+</main>
+{% endblock %}

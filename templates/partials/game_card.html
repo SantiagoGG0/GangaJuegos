@@ -1,0 +1,14 @@
+<a href="{{ g.url }}" class="hv-card" data-tilt="10" {% if grid %}data-card="1" data-plat="{{ g.plat }}" data-genre="{{ g.genre_l }}" data-title="{{ g.title_l }}" data-deal="{% if g.has_disc %}1{% endif %}" data-sec="{{ g.sec_cop }}" data-disc="{{ g.disc_pct }}" data-rel="{{ g.rel }}"{% if not g.visible %} hidden{% endif %} {% endif %}style="cursor:pointer;display:flex;flex-direction:column;{% if rail %}width:var(--railCol);flex-shrink:0;margin-right:12px;{% else %}min-width:0;{% endif %}background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s,box-shadow .2s">
+  <div style="position:relative;aspect-ratio:3/4;{{ g.cover_bg }}">
+    {% if not g.has_cover %}<div class="gj-cover-label">{{ g.initials }}</div>{% endif %}
+    {% if g.has_disc %}<span style="position:absolute;top:8px;right:-4px;padding:5px 10px 5px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 13px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ g.disc }}</span>{% endif %}
+  </div>
+  <div style="padding:10px 10px 12px;display:flex;flex-direction:column;gap:6px;flex:1">
+    <div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4A5A78">{{ g.plat }}</div>
+    <div style="font-size:14px;line-height:18px;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px">{{ g.title }}</div>
+    <div style="display:flex;flex-direction:column;gap:2px;margin-top:auto;padding-top:6px;border-top:1px solid #E6DED2">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px"><span style="font-size:11px;font-weight:600;color:#4A5A78">Primaria</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ g.prim }}</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px"><span style="font-size:11px;font-weight:600;color:#4A5A78">Secundaria</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:#C93000">{{ g.sec }}</span></div>
+    </div>
+  </div>
+</a>

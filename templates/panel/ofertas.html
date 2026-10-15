@@ -1,0 +1,41 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Ofertas" style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+  <div style="flex:1 1 520px;min-width:0;background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
+    <div style="min-width:560px">
+      <div style="display:grid;grid-template-columns:2fr 80px 120px 120px 110px 60px;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+        <div>Juego en oferta</div><div>Desc.</div><div style="text-align:right">Precio oferta</div><div style="text-align:right">Antes</div><div>Termina</div><div></div>
+      </div>
+      {% for o in rows %}
+        <div style="display:grid;grid-template-columns:2fr 80px 120px 120px 110px 60px;gap:12px;padding:12px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0"><div style="width:30px;aspect-ratio:3/4;border-radius:3px;flex-shrink:0;{{ o.cover_bg }}"></div><span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.title }}</span></div>
+          <div><span style="display:inline-block;padding:4px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 12px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ o.pct }}</span></div>
+          <div style="text-align:right;font-weight:800;font-variant-numeric:tabular-nums">{{ o.price }}</div>
+          <div style="text-align:right;color:#4A5A78;text-decoration:line-through;font-variant-numeric:tabular-nums">{{ o.old }}</div>
+          <div style="font-size:13px;color:#4A5A78">{{ o.ends }}</div>
+          <form method="post" action="{% url 'gsadmin:dashboard_offer_remove' o.pk %}" style="margin:0;text-align:right">{% csrf_token %}<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13px;font-weight:700;color:#C93000">Quitar</button></form>
+        </div>
+      {% empty %}
+        <div style="padding:28px 16px;border-top:1px solid #EFE8DD;font-size:14px;color:#4A5A78;text-align:center">No hay juegos en oferta. Publica la primera desde el formulario.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <form method="post" action="{% url 'gsadmin:dashboard_offer_create' %}" data-offer-form="1" style="flex:0 1 320px;min-width:280px;background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;margin:0">
+    {% csrf_token %}
+    <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Nueva oferta</div>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Juego</span>
+      <select name="juego" data-offer-game="1" required style="height:42px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px">
+        {% for c in candidates %}<option value="{{ c.pk }}" data-prim="{{ c.prim }}">{{ c.title }}</option>{% endfor %}
+      </select>
+    </label>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Descuento · <span data-offer-pct-label="1">20%</span></span>
+      <input type="range" name="pct" min="5" max="70" step="5" value="20" data-offer-pct="1" style="accent-color:#FC5F01">
+    </label>
+    <div style="padding:12px;border-radius:4px;background:#FCF8F3;font-size:13px;color:#4A5A78;display:flex;justify-content:space-between"><span>Primaria en oferta</span><strong data-offer-preview="1" style="color:#011E4F">—</strong></div>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Termina</span>
+      <input type="date" name="ends" min="{{ today }}" style="height:42px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:14px">
+    </label>
+    <button type="submit" {% if not candidates %}disabled{% endif %} style="height:46px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Publicar oferta</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Ganga Juegos · Juegos digitales PS4 y PS5 en minutos{% endblock %}</title>
+<meta name="description" content="{% block description %}Cuentas digitales originales de PS4 y PS5 con entrega en minutos, garantía de 1 año y pago por Mercado Pago, PayPal o WhatsApp. PS Plus, combos y gift cards PSN.{% endblock %}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#011E4F">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="Ganga Juegos">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="{% static 'img/ganga-icon.png' %}">
+<link rel="apple-touch-icon" href="{% static 'img/ganga-icon.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/ganga.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body data-wa-number="{{ whatsapp_number_digits }}">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N65RN236" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div data-frame="1" style="min-height:100vh;overflow-x:clip;background:#011E4F;color:#FCF8F3;position:relative;display:flex;flex-direction:column">
+  <div data-intro="1" style="display:none;position:absolute;inset:0;z-index:100;background:#011E4F">
+    <div style="position:sticky;top:0;height:min(844px,100vh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+      <img data-intro-logo="1" src="{% static 'img/ganga-icon.png' %}" alt="" style="width:128px;height:128px;object-fit:contain">
+      <div data-intro-word="1" style="font:italic 900 36px/0.9 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase;text-align:center;color:#FCF8F3">Ganga<br><span style="color:#FC8B01">Juegos</span></div>
+    </div>
+  </div>
+
+  {% include "partials/header.html" %}
+
+  <div style="flex:1">
+  {% block content %}{% endblock %}
+  </div>
+
+  {% include "partials/footer.html" %}
+  {% include "partials/overlays.html" %}
+</div>
+<script src="{% static 'js/ganga-fx.js' %}"></script>
+<script src="{% static 'js/ganga-store.js' %}"></script>
+<script src="{% static 'js/pixel-events.js' %}" defer></script>
+{% if pixel_event_json %}
+<script>
+(function () {
+  var ev = {{ pixel_event_json|safe }};
+  if (window.fbq && ev && ev.name) { fbq('track', ev.name, ev.params || {}); }
+})();
+</script>
+{% endif %}
+{% block extra_js %}{% endblock %}
+</body>
+</html>

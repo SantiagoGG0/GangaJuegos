@@ -1,0 +1,30 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Carátulas" data-covers="1" style="display:flex;flex-direction:column;gap:16px">
+  {% csrf_token %}
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+    <div style="display:flex;gap:2px;padding:3px;background:#fff;border:1px solid #E6DED2;border-radius:4px">
+      {% for f in cover_filters %}
+        <a href="{{ f.url }}" style="border:0;cursor:pointer;height:32px;padding:0 12px;border-radius:2px;font-size:13px;font-weight:700;background:{% if f.on %}#011E4F{% else %}transparent{% endif %};color:{% if f.on %}#FCF8F3{% else %}#4A5A78{% endif %};display:flex;align-items:center">{{ f.label }}</a>
+      {% endfor %}
+    </div>
+    <span style="font-size:13px;color:#4A5A78">Formato vertical 3:4 · mínimo 600 × 800 px</span>
+  </div>
+  <input type="file" accept="image/*" data-cover-file="1" hidden>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+    {% for g in rows %}
+      <div data-cover-card="{{ g.slug }}" style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow:hidden;display:flex;flex-direction:column">
+        <div data-cover-img="1" style="position:relative;aspect-ratio:3/4;{{ g.bg }};display:flex;align-items:center;justify-content:center;border-bottom:1px solid #E6DED2">
+          {% if g.missing %}<span data-cover-missing="1" style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9A2A00">Sin carátula</span>{% endif %}
+        </div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:13px;font-weight:700;line-height:17px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px">{{ g.title }}</div>
+          <button type="button" data-cover-upload="{{ g.upload_url }}" style="height:34px;border:{% if g.missing %}0{% else %}1px solid #E6DED2{% endif %};border-radius:4px;background:{% if g.missing %}#011E4F{% else %}transparent{% endif %};color:{% if g.missing %}#FCF8F3{% else %}#011E4F{% endif %};font-size:12px;font-weight:700;cursor:pointer">{% if g.missing %}Subir carátula{% else %}Reemplazar{% endif %}</button>
+        </div>
+      </div>
+    {% empty %}
+      <div style="font-size:14px;color:#4A5A78">Todos los juegos tienen carátula. 🎉</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

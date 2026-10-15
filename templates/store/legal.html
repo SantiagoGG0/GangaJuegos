@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ legal_title }} · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Legales" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+  <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">
+    <a href="{% url 'store:terms' %}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'terminos' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'terminos' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Términos</a>
+    <a href="{% url 'store:privacy' %}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'privacidad' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'privacidad' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Privacidad</a>
+  </div>
+  <div>
+    <h1 style="margin:0;font:italic 900 var(--detailH1)/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase;text-wrap:balance">{{ legal_title }}</h1>
+    <div style="font-size:13px;color:#A9B8D6;margin-top:10px">Última actualización: {{ updated }}</div>
+  </div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <aside class="gj-d" style="width:260px;flex-shrink:0;position:sticky;top:96px;display:flex;flex-direction:column">
+      {% for sec in sections %}
+        <a href="#s{{ sec.n }}" style="padding:8px 12px;border-left:3px solid rgba(252,248,243,.15);font-size:14px;color:#C9D4E8"><span style="color:#FC8B01;font-weight:800;margin-right:6px">{{ sec.n }}</span>{{ sec.title }}</a>
+      {% endfor %}
+    </aside>
+    <div style="flex:1;min-width:0;max-width:720px;display:flex;flex-direction:column;gap:28px">
+      {% for sec in sections %}
+        <section id="s{{ sec.n }}" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:96px">
+          <h2 style="margin:0;font-size:20px;line-height:26px;font-weight:800;display:flex;gap:10px"><span style="color:#FC8B01;font-style:italic">{{ sec.n }}</span>{{ sec.title }}</h2>
+          {% for para in sec.body %}<p style="margin:0;font-size:15px;line-height:24px;color:#C9D4E8;text-wrap:pretty">{{ para }}</p>{% endfor %}
+          {% if forloop.last and support_email %}<p style="margin:0;font-size:15px;line-height:24px;color:#C9D4E8">Correo de soporte: <a href="mailto:{{ support_email }}" style="font-weight:700">{{ support_email }}</a></p>{% endif %}
+        </section>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

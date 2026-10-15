@@ -1,0 +1,21 @@
+# Secretos y datos de producción
+.env
+db.sqlite3
+media/
+
+# Generados
+venv/
+.venv/
+staticfiles/
+__pycache__/
+*.pyc
+
+# Material de diseño
+design-export/
+design-export.zip
+
+# Editor / sistema
+.vscode/
+*.code-workspace
+Thumbs.db
+.DS_Store

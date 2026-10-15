@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Tu carrito · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Carrito" style="max-width:1200px;margin:0 auto;padding:0 var(--pad) 48px;width:100%">
+  <div style="display:flex;align-items:baseline;gap:12px;padding:var(--cartTop) 0 20px">
+    <h1 style="margin:0;font:italic 900 var(--detailH1)/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase">Tu carrito</h1>
+    <span style="font-size:14px;font-weight:600;color:#A9B8D6">{{ item_count }} productos</span>
+  </div>
+  {% if cart_empty %}
+    <div style="padding:48px 24px;border:1px dashed rgba(252,248,243,.25);border-radius:8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="font:italic 900 22px/1 'Archivo',sans-serif;text-transform:uppercase">Tu carrito está vacío</div>
+      <div style="font-size:14px;color:#C9D4E8">Explora el catálogo y encuentra tu próximo juego.</div>
+      <a href="{% url 'store:catalog' %}" data-magnetic="1" style="height:48px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center">Ir al catálogo</a>
+    </div>
+  {% else %}
+    <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+      <div style="flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:28px">
+        <div data-reveal-stagger="1" style="display:flex;flex-direction:column;gap:8px">
+          {% for it in items %}
+            <div style="display:flex;gap:12px;padding:12px;border-radius:8px;background:#FCF8F3;color:#011E4F;align-items:center">
+              <a href="{{ it.url }}" aria-label="{{ it.title }}" style="width:56px;flex-shrink:0;aspect-ratio:3/4;border-radius:4px;{{ it.cover_bg }};cursor:pointer"></a>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                <div style="font-size:15px;font-weight:700;line-height:19px">{{ it.title }}</div>
+                <div style="font-size:12px;font-weight:600;color:#4A5A78">{{ it.sub }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                <div style="font-size:16px;font-weight:900;white-space:nowrap">{{ it.price }}</div>
+                <form method="post" action="{% url 'orders:cart_remove' it.index %}" style="margin:0">{% csrf_token %}<button type="submit" style="border:0;background:transparent;padding:0;font-size:12px;color:#C93000;cursor:pointer;font-weight:700">Quitar</button></form>
+              </div>
+            </div>
+          {% endfor %}
+          <div style="font-size:13px;color:#C9D4E8;padding:4px 2px">Las cuentas se entregan por WhatsApp o correo apenas se confirma el pago.</div>
+        </div>
+
+        <section style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase"><span style="width:5px;height:18px;background:#FC5F01;transform:skewX(-14deg)"></span>Método de pago</div>
+          {% for m in methods %}
+            <button type="button" data-pay="{{ m.id }}" data-pay-label="{{ m.label }}" style="display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border-radius:8px;border:2px solid {% if forloop.first %}#FC8B01{% else %}rgba(252,248,243,.15){% endif %};background:#0A2B66;color:#FCF8F3;cursor:pointer;min-height:64px">
+              <span data-pay-dot="1" style="width:20px;height:20px;border-radius:50%;border:2px solid {% if forloop.first %}#FC8B01{% else %}rgba(252,248,243,.4){% endif %};background:{% if forloop.first %}#FC8B01{% else %}transparent{% endif %};flex-shrink:0;display:flex;align-items:center;justify-content:center"><span data-pay-inner="1" style="width:8px;height:8px;border-radius:50%;background:{% if forloop.first %}#011E4F{% else %}transparent{% endif %}"></span></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:15px">{{ m.name }}</span><span style="display:block;font-size:13px;color:#C9D4E8">{{ m.desc }}</span></span>
+            </button>
+          {% endfor %}
+        </section>
+      </div>
+
+      <aside style="flex:1 1 320px;max-width:var(--summaryMax);position:sticky;top:96px;display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:8px;background:#FCF8F3;color:#011E4F">
+        <div style="font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase">Resumen</div>
+        <form method="post" action="{% url 'orders:apply_coupon' %}" style="display:flex;flex-direction:column;gap:6px;margin:0">{% csrf_token %}
+          <label for="gj-coupon" style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Cupón</label>
+          <div style="display:flex;gap:8px">
+            <input id="gj-coupon" name="code" data-coupon-input="1" value="{{ coupon_code }}" placeholder="Ej. {% if promo %}{{ promo.code }}{% else %}GANGA10{% endif %}" style="flex:1;min-width:0;height:44px;padding:0 12px;border:1px solid {% if coupon_msg_error %}#B42318{% else %}#E6DED2{% endif %};border-radius:4px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;outline:none;background:#fff">
+            <button type="submit" style="height:44px;padding:0 16px;border:0;border-radius:4px;background:#011E4F;color:#FCF8F3;font-weight:700;font-size:14px;cursor:pointer">Aplicar</button>
+          </div>
+          {% if coupon_msg %}
+            <div {% if coupon_msg_ok %}data-burst="ok"{% endif %} data-enter="drop" style="font-size:12px;font-weight:600;color:{% if coupon_msg_ok %}#0B7A43{% else %}#B42318{% endif %}">{{ coupon_msg }}</div>
+          {% elif coupon_code %}
+            <div style="font-size:12px;font-weight:600;color:#0B7A43">Cupón {{ coupon_code }} aplicado</div>
+          {% endif %}
+        </form>
+        {% if referral_enabled %}
+        <form method="post" action="{% url 'orders:apply_referral' %}" data-ref-form="1" style="display:flex;flex-direction:column;gap:6px;margin:0">{% csrf_token %}
+          <label for="gj-ref" style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Código de referido</label>
+          <input id="gj-ref" name="code" value="{{ referral_code }}" placeholder="Opcional" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;font-size:14px;outline:none;background:#fff">
+          {% if ref_msg %}<div data-enter="drop" style="font-size:12px;font-weight:600;color:{% if ref_msg_ok %}#0B7A43{% else %}#B42318{% endif %}">{{ ref_msg }}</div>{% endif %}
+        </form>
+        {% endif %}
+        {% if credit_available %}
+        <form method="post" action="{% url 'orders:toggle_credit' %}" style="margin:0">{% csrf_token %}
+          {% if not credit_on %}<input type="hidden" name="use_credit" value="on">{% endif %}
+          <button type="submit" style="display:flex;align-items:center;gap:12px;border:0;background:transparent;padding:4px 0;cursor:pointer;text-align:left">
+            <span style="width:40px;height:24px;border-radius:999px;background:{% if credit_on %}#011E4F{% else %}#CFC6B8{% endif %};position:relative;flex-shrink:0;transition:background .2s"><span style="position:absolute;top:3px;left:{% if credit_on %}19px{% else %}3px{% endif %};width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)"></span></span>
+            <span style="font-size:14px">Usar saldo a favor <strong>{{ credit_amount }}</strong></span>
+          </button>
+        </form>
+        {% endif %}
+        <div style="border-top:1px solid #E6DED2;padding-top:16px;display:flex;flex-direction:column;gap:8px;font-size:14px">
+          <div style="display:flex;justify-content:space-between"><span style="color:#4A5A78">Subtotal</span><span style="font-weight:700">{{ subtotal }}</span></div>
+          {% if coupon_disc %}<div style="display:flex;justify-content:space-between"><span style="color:#4A5A78">Cupón {{ coupon_code }}</span><span style="font-weight:700;color:#0B7A43">− {{ coupon_disc }}</span></div>{% endif %}
+          {% if credit_used %}<div style="display:flex;justify-content:space-between"><span style="color:#4A5A78">Saldo a favor</span><span style="font-weight:700;color:#0B7A43">− {{ credit_used }}</span></div>{% endif %}
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:8px"><span style="font-weight:800;text-transform:uppercase;letter-spacing:.04em">Total</span><span data-pop="{{ total }}" style="font:italic 900 30px/1 'Archivo',sans-serif">{{ total }}</span></div>
+        </div>
+        {% for m in methods %}
+          {% if m.id == 'wa' %}
+            <a href="{{ m.action }}" target="_blank" rel="noopener" data-pay-go="wa" data-pixel-event="InitiateCheckout" data-pixel-value="{{ total_cop }}" data-magnetic="1" {% if not forloop.first %}hidden{% endif %} style="height:54px;border:0;border-radius:4px;background:#25D366;color:#011E4F;font:italic 800 16px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center">{{ m.label }}</a>
+          {% elif user.is_authenticated %}
+            <form method="post" action="{{ m.action }}" data-pay-go="{{ m.id }}" data-pixel-value="{{ total_cop }}" {% if not forloop.first %}hidden{% endif %} style="margin:0;display:flex;flex-direction:column">{% csrf_token %}
+              <button type="submit" data-magnetic="1" style="height:54px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 16px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">{{ m.label }}</button>
+            </form>
+          {% else %}
+            <a href="{% url 'store:auth' %}?next={% url 'store:cart' %}" data-pay-go="{{ m.id }}" data-magnetic="1" {% if not forloop.first %}hidden{% endif %} style="height:54px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 16px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center">{{ m.label }}</a>
+          {% endif %}
+        {% endfor %}
+        <div style="font-size:12px;color:#4A5A78;text-align:center">Pago seguro · Garantía de 1 año</div>
+      </aside>
+    </div>
+  {% endif %}
+</main>
+{% endblock %}

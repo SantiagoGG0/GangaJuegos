@@ -1,0 +1,58 @@
+/* Ganga Juegos · rediseño v4
+   El diseño original alterna dos juegos de medidas (objeto `L`) según el
+   dispositivo; aquí son variables CSS que cambian en el breakpoint de
+   escritorio. El resto del estilo vive inline en las plantillas, idéntico
+   al diseño. Los estados `style-hover` del diseño son las clases .hv-*. */
+
+:root {
+  --pad: 16px; --headerH: 60px; --logoW: 34px; --h1: 44px; --h2: 22px;
+  --railCol: 156px; --secGap: 40px; --heroTop: 32px; --heroBottom: 32px;
+  --detailH1: 28px; --cartTop: 24px; --authTop: 32px; --summaryMax: 100%;
+  --cfW: 168px; --cfML: -84px; --cfH: 250px; --genreMin: 150px;
+  --toastW: calc(100% - 172px);
+  --grad: linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);
+}
+@media (min-width: 900px) {
+  :root {
+    --pad: 32px; --headerH: 72px; --logoW: 40px; --h1: 80px; --h2: 30px;
+    --railCol: 188px; --secGap: 64px; --heroTop: 64px; --heroBottom: 64px;
+    --detailH1: 48px; --cartTop: 40px; --authTop: 64px; --summaryMax: 400px;
+    --cfW: 230px; --cfML: -115px; --cfH: 340px; --genreMin: 180px;
+    --toastW: 340px;
+  }
+}
+
+body { margin: 0; background: #011E4F; color: #FCF8F3; font-family: 'Archivo', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+a { color: #FCC602; text-decoration: none; cursor: pointer; }
+a:hover { color: #FC8B01; }
+input, select, button, textarea { font: inherit; color: inherit; }
+input::placeholder { color: #6B7891; }
+[hidden] { display: none !important; }
+form.gj-contents { display: contents; }
+
+/* solo móvil / solo escritorio (equivale a isMobile / isDesktop del diseño) */
+@media (max-width: 899.98px) { .gj-d { display: none !important; } }
+@media (min-width: 900px) { .gj-m { display: none !important; } }
+
+/* style-hover del diseño */
+.hv-y:hover { color: #FCC602 !important; }
+.hv-cream:hover { background: #F0E8DC !important; }
+.hv-navy:hover { background: #0F3478 !important; }
+.hv-chip:hover { border-color: #FC8B01 !important; color: #FCC602 !important; }
+.hv-card:hover { box-shadow: 0 0 0 2px #FC8B01, 0 18px 36px -12px rgba(252,95,1,.55) !important; }
+.hv-ring:hover { box-shadow: 0 0 0 2px #FC8B01 !important; }
+.hv-red:hover { color: #C93000 !important; }
+.hv-tab:hover { background: #0A2B66 !important; }
+
+.gj-noscroll { scrollbar-width: none; }
+.gj-noscroll::-webkit-scrollbar { display: none; }
+
+/* select nativo del diseño sobre fondo navy */
+select option { color: #011E4F; background: #FCF8F3; }
+
+/* tarjeta de juego: imagen real recortada al 3:4 */
+.gj-cover-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(1,30,79,.4); }
+
+/* video del hero */
+.gj-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }

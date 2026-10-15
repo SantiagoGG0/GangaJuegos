@@ -1,0 +1,62 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Carga masiva" style="display:flex;flex-direction:column;gap:16px;max-width:1000px">
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px">
+      <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">1 · Plantilla</div>
+      <a href="{% url 'gsadmin:products_bulk_template' %}" style="height:36px;padding:0 14px;border:1px solid #011E4F;border-radius:4px;background:transparent;font-size:13px;font-weight:700;cursor:pointer;color:#011E4F;display:flex;align-items:center">Descargar plantilla CSV</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      {% for c in columns %}<span style="font-size:12px;font-weight:700;padding:5px 8px;border-radius:4px;background:#F4EFE7">{{ c }}</span>{% endfor %}
+    </div>
+  </div>
+  <form method="post" enctype="multipart/form-data" action="{% url 'gsadmin:products_bulk_upload' %}" data-drop-form="1" style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px;margin:0">
+    {% csrf_token %}
+    <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">2 · Sube tu archivo</div>
+    <input type="file" name="file" accept=".csv,.xlsx" data-drop-input="1" hidden>
+    <button type="button" data-drop-zone="1" style="padding:28px 16px;border:2px dashed {% if loaded %}#1FA35A{% else %}#CFC6B8{% endif %};border-radius:8px;background:{% if loaded %}#F1FBF5{% else %}#FCF8F3{% endif %};cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%">
+      <span style="font-size:15px;font-weight:800">{% if loaded %}{{ file_name }}{% else %}Arrastra tu archivo CSV aquí{% endif %}</span>
+      <span style="font-size:13px;color:#4A5A78">{% if loaded %}{{ n_rows }} filas leídas · haz clic para cambiar el archivo{% else %}o haz clic para elegirlo{% endif %}</span>
+    </button>
+    {% if upload_error %}<div style="font-size:13px;font-weight:600;color:#9A2A00">{{ upload_error }}</div>{% endif %}
+  </form>
+  {% if loaded %}
+    <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow:hidden">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #E6DED2">
+        <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">3 · Revisa e importa</div>
+        <div style="font-size:13px;color:#4A5A78"><strong style="color:#0B5D33">{{ ok_count }} válidas</strong> · <strong style="color:#9A2A00">{{ err_count }} con errores</strong></div>
+      </div>
+      <div style="overflow-x:auto">
+        <div style="min-width:900px">
+          <div style="display:grid;grid-template-columns:minmax(220px,2fr) 70px minmax(100px,1fr) 110px 110px minmax(170px,1.4fr);gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+            <div>Título</div><div>Plat.</div><div>Género</div><div style="text-align:right">Primaria</div><div style="text-align:right">Secundaria</div><div>Validación</div>
+          </div>
+          {% for r in rows %}
+            <div style="display:grid;grid-template-columns:minmax(220px,2fr) 70px minmax(100px,1fr) 110px 110px minmax(170px,1.4fr);gap:12px;padding:10px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px;background:{% if r.err %}#FFF8F4{% else %}transparent{% endif %}">
+              <div style="font-weight:700">{{ r.title|default:'—' }}</div><div style="font-size:12px;font-weight:800">{{ r.plat|default:'—' }}</div><div style="font-size:13px;color:#4A5A78">{{ r.genre }}</div>
+              <div style="text-align:right;font-variant-numeric:tabular-nums">{{ r.prim_f }}</div><div style="text-align:right;font-variant-numeric:tabular-nums">{{ r.sec_f }}</div>
+              <div><span style="font-size:12px;font-weight:800;padding:4px 8px;border-radius:4px;background:{% if r.err %}#FFE1D6{% else %}#D7F5E3{% endif %};color:{% if r.err %}#9A2A00{% else %}#0B5D33{% endif %}">{% if r.err %}{{ r.err }}{% else %}Lista{% endif %}</span></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:14px 16px;border-top:1px solid #E6DED2">
+        {% if imported %}
+          <span style="height:44px;padding:0 20px;border:0;border-radius:4px;background:#25D366;color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;display:flex;align-items:center">{{ imported }} juegos importados ✓</span>
+          <form method="post" action="{% url 'gsadmin:products_bulk_reset' %}" style="margin:0">{% csrf_token %}<button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13px;font-weight:700;color:#C93000">Subir otro archivo</button></form>
+        {% else %}
+          <form method="post" action="{% url 'gsadmin:products_bulk_import' %}" style="margin:0">{% csrf_token %}
+            <button type="submit" {% if not ok_count %}disabled{% endif %} style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Importar {{ ok_count }} juegos</button>
+          </form>
+        {% endif %}
+        <span style="font-size:13px;color:#4A5A78">Las filas con errores no se importan.</span>
+      </div>
+      {% if import_errors %}
+        <div style="padding:12px 16px;border-top:1px solid #E6DED2;display:flex;flex-direction:column;gap:4px">
+          {% for e in import_errors %}<div style="font-size:13px;color:#9A2A00">{{ e }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

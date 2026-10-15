@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}PS Plus · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="PS Plus" data-plus="1" data-tier="{{ sel_tier }}" data-months="{{ sel_months }}" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+  {% include "partials/page_head.html" with kicker="Suscripción" title="PS Plus" lead="Elige el plan y la duración. Te enviamos tu suscripción en minutos." %}
+  {% if platforms %}
+  <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">
+    {% for p in platforms %}<a href="?platform={{ p }}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if p == platform %}#FCF8F3{% else %}transparent{% endif %};color:{% if p == platform %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">{{ p }}</a>{% endfor %}
+  </div>
+  {% endif %}
+  <div style="display:flex;align-items:center;gap:10px;font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase"><span style="width:5px;height:18px;background:#FC5F01;transform:skewX(-14deg)"></span>1 · Elige tu plan</div>
+  <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+    {% for t in tiers %}
+      <button type="button" data-tier="{{ t.tier }}" data-tilt="4" style="text-align:left;cursor:pointer;padding:18px 16px;border-radius:8px;border:2px solid {% if t.tier == sel_tier %}#FC8B01{% else %}rgba(252,248,243,.15){% endif %};background:{% if t.tier == sel_tier %}#FCF8F3{% else %}#0A2B66{% endif %};color:{% if t.tier == sel_tier %}#011E4F{% else %}#FCF8F3{% endif %};display:flex;flex-direction:column;gap:8px;transition:all .15s">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%"><span style="font:italic 900 22px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase">{{ t.tier }}</span><span data-tier-tag="1" style="font-size:11px;font-weight:800;padding:4px 8px;background:{% if t.tier == sel_tier %}#FCC602{% else %}#FC8B01{% endif %};color:#011E4F;transform:skewX(-10deg);white-space:nowrap">{{ t.tag }}</span></div>
+        <div data-tier-price="1" style="font:italic 900 26px/1.1 'Archivo',sans-serif;margin-top:4px">{{ t.price }}</div>
+        <div data-tier-per="1" style="font-size:12px;font-weight:600;color:{% if t.tier == sel_tier %}#4A5A78{% else %}#A9B8D6{% endif %}">{{ t.per }}</div>
+        <div data-tier-line="1" style="display:flex;flex-direction:column;gap:6px;padding-top:10px;margin-top:4px;border-top:1px solid {% if t.tier == sel_tier %}#E6DED2{% else %}rgba(252,248,243,.12){% endif %};width:100%">
+          {% for pk in t.perks %}<div style="display:flex;gap:8px;font-size:13px;line-height:18px"><span style="width:7px;height:7px;margin-top:6px;flex-shrink:0;background:#FC5F01;transform:rotate(45deg)"></span>{{ pk }}</div>{% endfor %}
+        </div>
+      </button>
+    {% endfor %}
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;font:italic 900 18px/1 'Archivo',sans-serif;font-stretch:110%;text-transform:uppercase"><span style="width:5px;height:18px;background:#FC5F01;transform:skewX(-14deg)"></span>2 · Duración</div>
+  <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">
+    {% for d in durations %}
+      <button type="button" data-months="{{ d.m }}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if d.m == sel_months %}#FCF8F3{% else %}transparent{% endif %};color:{% if d.m == sel_months %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap">{{ d.label }}</button>
+    {% endfor %}
+  </div>
+  <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-radius:8px;background:#FCF8F3;color:#011E4F">
+    <div><div data-plus-summary="1" style="font-size:13px;font-weight:600;color:#4A5A78">PS Plus {{ sel_tier }} · {% if sel_months == 1 %}1 mes{% else %}{{ sel_months }} meses{% endif %}</div><div data-plus-price="1" data-pop="{{ sel_price }}" style="font:italic 900 28px/1.15 'Archivo',sans-serif">{{ sel_price }}</div></div>
+    <button type="button" data-add-item="plan" data-id="{{ sel_id }}" data-fly="1" data-magnetic="1" data-label="Agregar al carrito" style="flex:1 1 200px;max-width:320px;height:52px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Agregar al carrito</button>
+  </div>
+  <script type="application/json" id="gj-plans">{{ plans_json|safe }}</script>
+</main>
+{% endblock %}

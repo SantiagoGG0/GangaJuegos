@@ -1,0 +1,57 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<div data-screen-label="Panel · Métricas" style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;gap:2px;padding:3px;background:#fff;border:1px solid #E6DED2;border-radius:4px;align-self:flex-start">
+    {% for p in periods %}
+      <a href="{{ p.url }}" style="border:0;cursor:pointer;height:34px;padding:0 14px;border-radius:2px;font-size:13px;font-weight:700;background:{% if p.on %}#011E4F{% else %}transparent{% endif %};color:{% if p.on %}#FCF8F3{% else %}#4A5A78{% endif %};display:flex;align-items:center">{{ p.label }}</a>
+    {% endfor %}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+    {% for k in kpis %}
+      <div style="padding:18px;border-radius:8px;background:#fff;border:1px solid #E6DED2;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">{{ k.label }}</div>
+        <div style="font:italic 900 28px/1.05 'Archivo',sans-serif">{{ k.value }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  <div style="background:#011E4F;color:#FCF8F3;border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Ventas por día</div><div style="font-size:12px;color:#A9B8D6">Millones de COP</div></div>
+    <div style="height:200px;display:flex;align-items:flex-end;gap:{{ bar_gap }}">
+      {% for b in bars %}<div title="{{ b.tip }}" style="flex:1;min-width:0;height:{{ b.h }};background:{{ b.bg }};border-radius:2px 2px 0 0"></div>{% endfor %}
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#A9B8D6"><span>{{ bar_start }}</span><span>Hoy</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
+    <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Ventas por país</div>
+      {% for c in by_country %}
+        <div style="display:grid;grid-template-columns:20px 90px 1fr 44px;gap:10px;align-items:center;font-size:13px">
+          <span style="width:20px;height:14px;border-radius:2px;background:{{ c.flag }};box-shadow:0 0 0 1px rgba(1,30,79,.12)"></span>
+          <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+          <div style="height:10px;background:#F4EFE7;border-radius:2px;overflow:hidden"><div style="height:100%;width:{{ c.w }};background:linear-gradient(90deg,#FC3C00,#FC8B01)"></div></div>
+          <span style="text-align:right;font-weight:800">{{ c.pct }}</span>
+        </div>
+      {% empty %}
+        <div style="font-size:13px;color:#4A5A78">Sin ventas aprobadas en este periodo.</div>
+      {% endfor %}
+    </div>
+    <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px">
+      <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Más vendidos</div>
+      {% for t in top_games %}
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span style="font:italic 900 18px/1 'Archivo',sans-serif;color:#FC5F01;width:22px">{{ t.n }}</span>
+          <div style="width:28px;aspect-ratio:3/4;border-radius:3px;{{ t.cover_bg }}"></div>
+          <span style="flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</span>
+          <span style="font-size:13px;color:#4A5A78">{{ t.units }}</span>
+        </div>
+      {% empty %}
+        <div style="font-size:13px;color:#4A5A78">Sin ventas aprobadas en este periodo.</div>
+      {% endfor %}
+      <div style="margin-top:6px;padding-top:12px;border-top:1px solid #EFE8DD;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>Primaria {{ prim_pct }}%</span><span style="color:#4A5A78">Secundaria {{ sec_pct }}%</span></div>
+        <div style="height:10px;display:flex;border-radius:2px;overflow:hidden"><div style="width:{{ prim_pct }}%;background:#011E4F"></div><div style="flex:1;background:#FCC602"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

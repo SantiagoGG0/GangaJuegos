@@ -1,0 +1,32 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<form method="post" action="{% url 'gsadmin:dashboard_save_rates' %}" data-screen-label="Panel · Divisas" style="display:flex;flex-direction:column;gap:16px;margin:0">
+  {% csrf_token %}
+  <div style="font-size:14px;line-height:21px;color:#4A5A78;max-width:680px">Los precios se cargan en COP. Cada moneda se calcula con la tasa frente al dólar y se redondea según su regla. El ejemplo usa la cuenta primaria de {{ sample_title }} ({{ sample_cop }}).</div>
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
+    <div style="min-width:760px">
+      <div style="display:grid;grid-template-columns:1.6fr 90px 150px 130px 1fr;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+        <div>Países</div><div>Moneda</div><div>1 USD =</div><div>Redondeo</div><div style="text-align:right">Ejemplo</div>
+      </div>
+      {% for c in rows %}
+        <div style="display:grid;grid-template-columns:1.6fr 90px 150px 130px 1fr;gap:12px;padding:12px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px">
+          <div style="display:flex;flex-wrap:wrap;gap:6px 14px">
+            {% for k in c.countries %}<span style="display:flex;align-items:center;gap:6px;font-weight:600"><span style="width:20px;height:14px;border-radius:2px;background:{{ k.flag }};box-shadow:0 0 0 1px rgba(1,30,79,.12)"></span>{{ k.name }}</span>{% endfor %}
+          </div>
+          <div style="font-weight:800">{{ c.code }}</div>
+          <div>
+            <input {% if c.editable %}name="rate_{{ c.code }}"{% else %}disabled{% endif %} value="{{ c.rate }}" inputmode="decimal" title="{{ c.rate_label }}" style="height:38px;width:100%;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#FCF8F3;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;outline:none">
+            {% if c.code == 'VES' %}<div style="font-size:11px;color:#4A5A78;margin-top:4px">Tasa BCV: 1 € = Bs</div>{% endif %}
+          </div>
+          <div style="font-size:13px;color:#4A5A78">{{ c.round }}</div>
+          <div style="text-align:right;font:italic 900 18px/1 'Archivo',sans-serif;font-variant-numeric:tabular-nums">{{ c.example }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <button type="submit" style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Guardar tasas</button>
+    <span style="font-size:13px;color:#4A5A78">{{ rates_note }}</span>
+  </div>
+</form>
+{% endblock %}

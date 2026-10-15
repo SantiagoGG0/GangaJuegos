@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{% if pedido.pago_estado == 'aprobado' %}Pago confirmado{% else %}Estado del pago{% endif %} · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Pago" style="max-width:560px;width:100%;margin:0 auto;padding:var(--authTop) var(--pad) 56px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+    {% if not pedido %}
+      <span style="width:64px;height:64px;border-radius:50%;background:#FC5F01;color:#011E4F;display:flex;align-items:center;justify-content:center;font:italic 900 30px/1 'Archivo',sans-serif">!</span>
+      <h1 style="margin:0;font:italic 900 30px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">No encontramos ese pedido</h1>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">Si el pago se realizó, escríbenos por WhatsApp con la referencia de tu transacción y lo confirmamos manualmente.</p>
+    {% elif pedido.pago_estado == 'aprobado' %}
+      <span data-burst="ok" style="width:64px;height:64px;border-radius:50%;background:#25D366;color:#011E4F;display:flex;align-items:center;justify-content:center;font:900 30px/1 'Archivo',sans-serif">✓</span>
+      <h1 style="margin:0;font:italic 900 30px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Pago confirmado</h1>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">Recibirás los datos de acceso por WhatsApp o correo en los próximos minutos.</p>
+    {% elif pedido.pago_estado == 'pendiente' %}
+      <span style="width:64px;height:64px;border-radius:50%;background:#FCC602;color:#011E4F;display:flex;align-items:center;justify-content:center;font:italic 900 30px/1 'Archivo',sans-serif">…</span>
+      <h1 style="margin:0;font:italic 900 30px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Tu pago está pendiente</h1>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">Algunos métodos (como PSE) tardan unos minutos en confirmarse. Te avisamos por WhatsApp apenas se apruebe.</p>
+    {% else %}
+      <span style="width:64px;height:64px;border-radius:50%;background:#0A2B66;border:2px solid rgba(252,248,243,.25);color:#FCF8F3;display:flex;align-items:center;justify-content:center;font:900 26px/1 'Archivo',sans-serif">×</span>
+      <h1 style="margin:0;font:italic 900 30px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">{% if pedido.pago_estado == 'cancelado' %}Pago cancelado{% else %}El pago no se pudo procesar{% endif %}</h1>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">No se realizó ningún cobro. Tus productos siguen en el carrito si quieres intentarlo de nuevo.</p>
+    {% endif %}
+  </div>
+
+  {% if pedido %}
+    <div data-reveal="scale" style="background:#FCF8F3;color:#011E4F;border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Pedido {{ pedido.ref }}</span>
+        <span style="font-size:12px;font-weight:800;padding:4px 8px;border-radius:4px;background:{% if pedido.pago_estado == 'aprobado' %}#D7F5E3{% elif pedido.pago_estado == 'pendiente' %}#FFF0C2{% else %}#FFE1D6{% endif %};color:{% if pedido.pago_estado == 'aprobado' %}#0B5D33{% elif pedido.pago_estado == 'pendiente' %}#7A4B00{% else %}#9A2A00{% endif %}">{{ pedido.get_pago_estado_display }}</span>
+      </div>
+      {% for item in items %}
+        <div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;padding-top:10px;border-top:1px solid #E6DED2"><span style="font-weight:700">{{ item.titulo }}{% if item.cuenta %} <span style="font-weight:600;color:#4A5A78">· Cuenta {{ item.cuenta }}</span>{% endif %}{% if item.cantidad > 1 %} x{{ item.cantidad }}{% endif %}</span></div>
+      {% endfor %}
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;border-top:1px solid #E6DED2"><span style="font-weight:800;text-transform:uppercase;letter-spacing:.04em">Total</span><span style="font:italic 900 28px/1 'Archivo',sans-serif">{{ total_display }}</span></div>
+    </div>
+  {% endif %}
+
+  {% if whatsapp_delivery_link %}
+    <div style="padding:18px;border-radius:8px;background:#0A2B66;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+      <div style="font-size:14px;line-height:20px;color:#C9D4E8">Envíanos el comprobante por WhatsApp para agilizar la entrega — el mensaje ya viene escrito, solo toca <strong style="color:#FCF8F3">Enviar</strong>.</div>
+      <a href="{{ whatsapp_delivery_link }}" target="_blank" rel="noopener" data-magnetic="1" style="height:48px;padding:0 22px;border-radius:4px;background:#25D366;color:#011E4F;display:flex;align-items:center;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase">Enviar comprobante →</a>
+    </div>
+  {% endif %}
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    {% if pedido.pago_estado == 'aprobado' %}
+      <a href="{% url 'store:account' %}" data-magnetic="1" style="height:48px;padding:0 20px;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;display:flex;align-items:center">Ver mis pedidos</a>
+    {% else %}
+      <a href="{% url 'store:cart' %}" data-magnetic="1" style="height:48px;padding:0 20px;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;display:flex;align-items:center">Volver al carrito</a>
+    {% endif %}
+    <a href="{% url 'store:catalog' %}" style="height:48px;padding:0 20px;border:1px solid rgba(252,248,243,.4);border-radius:4px;background:transparent;color:#FCF8F3;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;display:flex;align-items:center">Seguir viendo</a>
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+{% if purchase_pixel_json %}
+<script>
+(function () {
+  var p = {{ purchase_pixel_json|safe }};
+  if (window.fbq && p) { fbq('track', 'Purchase', p); }
+})();
+</script>
+{% endif %}
+{% endblock %}

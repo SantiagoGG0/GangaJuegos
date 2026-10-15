@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if tab == 'signup' %}Crear cuenta{% else %}Ingresar{% endif %} · Ganga Juegos{% endblock %}
+{% block content %}
+<main data-page="1" data-screen-label="Ingresar" data-auth="1" style="max-width:440px;width:100%;margin:0 auto;padding:var(--authTop) var(--pad) 56px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+    <img data-float="1" src="{% static 'img/ganga-icon.png' %}" alt="" style="width:56px;height:56px;object-fit:contain">
+    <h1 data-auth-title="1" data-login="Bienvenido de nuevo" data-signup="Crea tu cuenta" style="margin:0;font:italic 900 30px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">{% if tab == 'signup' %}Crea tu cuenta{% else %}Bienvenido de nuevo{% endif %}</h1>
+    <p data-auth-sub="1" data-login="Ingresa para ver tus pedidos y tu saldo a favor." data-signup="Guarda tus pedidos y acumula saldo a favor." style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">{% if tab == 'signup' %}Guarda tus pedidos y acumula saldo a favor.{% else %}Ingresa para ver tus pedidos y tu saldo a favor.{% endif %}</p>
+  </div>
+  <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px">
+    <button type="button" data-auth-tab="login" style="flex:1;border:0;cursor:pointer;height:40px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'login' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'login' %}#011E4F{% else %}#C9D4E8{% endif %}">Ingresar</button>
+    <button type="button" data-auth-tab="signup" style="flex:1;border:0;cursor:pointer;height:40px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'signup' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'signup' %}#011E4F{% else %}#C9D4E8{% endif %}">Crear cuenta</button>
+  </div>
+  <form method="post" action="{% url 'store:auth' %}" data-reveal="scale" style="background:#FCF8F3;color:#011E4F;border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px;margin:0">
+    {% csrf_token %}
+    <input type="hidden" name="tab" value="{{ tab }}" data-auth-tab-input="1">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label data-signup-only="1" {% if tab != 'signup' %}hidden{% endif %} style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Nombre</span><input type="text" name="nombre" value="{{ values.nombre }}" placeholder="Tu nombre" autocomplete="name" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Correo</span><input type="email" name="email" value="{{ values.email }}" required placeholder="tu@correo.com" autocomplete="email" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+    <label data-signup-only="1" {% if tab != 'signup' %}hidden{% endif %} style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">WhatsApp</span>
+      <div style="display:flex;border:1px solid #E6DED2;border-radius:4px;background:#fff;overflow:hidden"><span style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid #E6DED2;font-size:14px;font-weight:700"><span style="width:20px;height:14px;border-radius:2px;background:{{ cur.flag }};box-shadow:0 0 0 1px rgba(1,30,79,.15)"></span>{{ dial }}</span><input type="tel" name="phone" value="{{ values.phone }}" placeholder="Número" autocomplete="tel-national" style="flex:1;min-width:0;height:44px;border:0;padding:0 12px;outline:none;font-size:15px;background:transparent;color:#011E4F"></div>
+    </label>
+    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78">Contraseña</span><input type="password" name="password" required placeholder="••••••••" autocomplete="current-password" style="height:44px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#fff;color:#011E4F;font-size:15px;outline:none"></label>
+    <a data-login-only="1" href="{{ whatsapp_login_link }}" target="_blank" rel="noopener" {% if tab != 'login' %}hidden{% endif %} style="font-size:13px;color:#C93000;font-weight:600;align-self:flex-end">¿Olvidaste tu contraseña?</a>
+    {% if error %}<div data-enter="drop" style="font-size:12px;font-weight:600;color:#B42318">{{ error }}</div>{% endif %}
+    <button type="submit" data-auth-cta="1" data-login="Ingresar" data-signup="Crear cuenta" data-magnetic="1" style="height:52px;margin-top:4px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;font:italic 800 15px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">{% if tab == 'signup' %}Crear cuenta{% else %}Ingresar{% endif %}</button>
+  </form>
+  <div style="font-size:13px;color:#C9D4E8;text-align:center">¿Problemas para ingresar? <a href="{{ whatsapp_login_link }}" target="_blank" rel="noopener" style="font-weight:700">Escríbenos por WhatsApp</a></div>
+</main>
+{% endblock %}
