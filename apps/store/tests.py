@@ -87,3 +87,9 @@ class CatalogPerformanceTests(TestCase):
         with self.assertNumQueries(0):
             data = self.client.get(reverse('store:search_api'), {'q': 'juego 01'}).json()
         self.assertEqual(data['total'], 10)
+
+    def test_catalog_data_is_gzipped_when_accepted(self):
+        import gzip as gz
+        resp = self.client.get(reverse('store:catalog_data'), HTTP_ACCEPT_ENCODING='gzip, br')
+        self.assertEqual(resp['Content-Encoding'], 'gzip')
+        self.assertEqual(len(json.loads(gz.decompress(resp.content))), 120)

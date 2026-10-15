@@ -1,3 +1,4 @@
+import gzip
 import json
 import re
 
@@ -286,7 +287,15 @@ def catalog_data(request):
             rows.append(row)
         return json.dumps(rows, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
 
-    response = HttpResponse(snapshot.cached(('catalog_json', currency), build), content_type='application/json')
+    body = snapshot.cached(('catalog_json', currency), build)
+    # nginx no comprime JSON: se envía ya comprimido (y comprimido una sola vez por versión).
+    if 'gzip' in request.headers.get('Accept-Encoding', ''):
+        response = HttpResponse(snapshot.cached(('catalog_json_gz', currency), lambda: gzip.compress(body, 6)),
+                                content_type='application/json')
+        response['Content-Encoding'] = 'gzip'
+    else:
+        response = HttpResponse(body, content_type='application/json')
+    response['Vary'] = 'Accept-Encoding'
     response['Cache-Control'] = 'public, max-age=86400'
     return response
 
