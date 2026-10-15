@@ -14,7 +14,7 @@ PLATFORM_CHOICES = [
 
 
 class Juego(models.Model):
-    title = models.CharField('título', max_length=160)
+    title = models.CharField('título', max_length=255)
     slug = models.SlugField('slug', max_length=180, unique=True)
     platform = models.CharField('plataforma', max_length=10, choices=PLATFORM_CHOICES)
     genre = models.CharField('género', max_length=120)

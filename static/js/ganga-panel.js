@@ -65,4 +65,10 @@
       if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; form.submit(); }
     });
   }
+
+  // Carga masiva: la importación va por tandas; se encadena la siguiente sola
+  var auto = $('[data-auto-submit]');
+  if (auto) {
+    setTimeout(function () { var b = $('button', auto); b.disabled = true; auto.submit(); }, 400);
+  }
 })();
