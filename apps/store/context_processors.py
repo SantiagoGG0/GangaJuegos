@@ -96,10 +96,10 @@ def global_context(request):
         'whatsapp_number_digits': whatsapp_number(),
         'support_email': settings_row.support_email,
         'is_admin': is_admin,
-        'whatsapp_float_link': wa_link('Hola, tengo una pregunta sobre Ganga Juegos.'),
+        'whatsapp_float_link': wa_link('Hola, tengo una pregunta sobre Ganga Juegos.', 'boton'),
         'whatsapp_advisor_link': wa_link('Hola, quiero que un asesor me ayude a elegir entre cuenta primaria y secundaria.'),
-        'whatsapp_help_link': wa_link('Hola, tengo una pregunta y no encontré la respuesta en la página.'),
-        'whatsapp_login_link': wa_link('Hola, tengo problemas para ingresar a mi cuenta de Ganga Juegos.'),
+        'whatsapp_help_link': wa_link('Hola, tengo una pregunta y no encontré la respuesta en la página.', 'soporte'),
+        'whatsapp_login_link': wa_link('Hola, tengo problemas para ingresar a mi cuenta de Ganga Juegos.', 'soporte'),
         'pixel_event_json': pixel_event_json,
     }
     # el panel de administración no usa nada de lo de abajo (menús, monedas,

@@ -327,8 +327,17 @@ class SiteSettings(models.Model):
     instagram_url = models.URLField('enlace al perfil de Instagram', blank=True)
 
     whatsapp_number = models.CharField(
-        'número de WhatsApp', max_length=20, blank=True,
-        help_text='Solo dígitos con código de país, ej: 573000000000. Se usa en todos los botones/enlaces de WhatsApp del sitio.',
+        'número de WhatsApp principal (ventas)', max_length=20, blank=True,
+        help_text='Solo dígitos con código de país, ej: 573000000000. Se usa para pedidos, carrito y asesoría, '
+                  'y en el botón flotante y soporte si esos no tienen un número propio.',
+    )
+    whatsapp_button_number = models.CharField(
+        'número del botón flotante de WhatsApp', max_length=20, blank=True,
+        help_text='Opcional. Vacío = usa el número principal.',
+    )
+    whatsapp_support_number = models.CharField(
+        'número de WhatsApp de soporte', max_length=20, blank=True,
+        help_text='Opcional. Ayuda, problemas para ingresar, estado de pedidos y garantía. Vacío = usa el número principal.',
     )
     whatsapp_community_url = models.URLField(
         'enlace de la comunidad/canal de WhatsApp', blank=True,
@@ -375,6 +384,13 @@ class SiteSettings(models.Model):
 
     @classmethod
     def load(cls):
+        """Configuración para LEER (cacheada: no modificar ni guardar esta
+        instancia). Para editar usar `load_fresh()`."""
+        from . import snapshot
+        return snapshot.cached('site_settings', cls.load_fresh)
+
+    @classmethod
+    def load_fresh(cls):
         obj, _ = cls.objects.get_or_create(pk=cls.SITE_SETTINGS_PK)
         return obj
 

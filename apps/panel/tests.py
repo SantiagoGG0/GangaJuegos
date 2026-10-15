@@ -257,3 +257,50 @@ class CatalogEditTests(TestCase):
         item = ItemPedido.objects.get()
         self.assertIsNone(item.juego)
         self.assertEqual(item.titulo, 'Juego 1')
+
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class ContactSettingsTests(TestCase):
+    def setUp(self):
+        from apps.catalog import snapshot
+        snapshot.bump()
+        self.client.force_login(get_user_model().objects.create_superuser('a@a.co', 'x', nombre='Admin'))
+        self.url = reverse('gsadmin:dashboard_contacto')
+
+    def _post(self, **over):
+        data = {'whatsapp_number': '+57 300 123 4567', 'whatsapp_button_number': '', 'whatsapp_support_number': '57-311-999-8888',
+                'whatsapp_community_url': 'https://whatsapp.com/channel/abc', 'support_email': 'soporte@gangajuegos.com',
+                'instagram_url': ''}
+        data.update(over)
+        return self.client.post(self.url, data)
+
+    def test_page_loads(self):
+        self.assertContains(self.client.get(self.url), 'WhatsApp de soporte')
+
+    def test_save_cleans_numbers_and_routes_links(self):
+        from apps.catalog.models import SiteSettings
+        from apps.store.whatsapp import wa_link, whatsapp_number
+        self.assertRedirects(self._post(), self.url)
+        s = SiteSettings.load_fresh()
+        self.assertEqual((s.whatsapp_number, s.whatsapp_support_number), ('573001234567', '573119998888'))
+        self.assertEqual(whatsapp_number('boton'), '573001234567')  # vacío -> principal
+        self.assertIn('wa.me/573119998888', wa_link('x', 'soporte'))
+        self.assertIn('wa.me/573001234567', wa_link('x'))
+
+    def test_invalid_values_are_rejected(self):
+        from apps.catalog.models import SiteSettings
+        before = SiteSettings.load_fresh().whatsapp_number
+        resp = self._post(whatsapp_number='123', support_email='no-es-correo')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'código de país')
+        self.assertContains(resp, 'Correo no válido')
+        self.assertEqual(SiteSettings.load_fresh().whatsapp_number, before)
+
+    def test_store_uses_new_numbers(self):
+        self._post(whatsapp_button_number='573005550000')
+        html = self.client.get('/', secure=True).content.decode()
+        self.assertIn('wa.me/573005550000', html)

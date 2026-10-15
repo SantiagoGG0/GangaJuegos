@@ -34,6 +34,7 @@ TABS = [
     ('divisas', 'Divisas', 'gsadmin:dashboard_divisas', 'Monedas'),
     ('caratulas', 'Carátulas', 'gsadmin:covers_manager', 'Imágenes'),
     ('carga', 'Carga masiva', 'gsadmin:products_bulk', 'Importar'),
+    ('contacto', 'Contacto', 'gsadmin:dashboard_contacto', 'WhatsApp y redes'),
 ]
 
 # estado → (etiqueta, fondo, texto) — paleta del diseño
@@ -571,3 +572,71 @@ def tab_caratulas(request):
     })
     return render(request, 'panel/caratulas.html', ctx)
 
+
+
+# --------------------------------------------------------------- Contacto
+
+CONTACT_NUMBER_FIELDS = [
+    ('whatsapp_number', 'WhatsApp principal (ventas)', 'Pedidos, carrito, asesoría y pagos. Obligatorio.', 'ventas'),
+    ('whatsapp_button_number', 'WhatsApp del botón flotante', 'El botón verde de todas las páginas. Vacío = usa el principal.', 'boton'),
+    ('whatsapp_support_number', 'WhatsApp de soporte', 'Ayuda, problemas para ingresar y estado de pedidos. Vacío = usa el principal.', 'soporte'),
+]
+CONTACT_TEXT_FIELDS = [
+    ('whatsapp_community_url', 'Enlace de la comunidad / canal de WhatsApp', 'https://whatsapp.com/channel/…', 'Botón "Unirme al canal" del home. Vacío = abre un chat con el número principal.'),
+    ('support_email', 'Correo de soporte', 'soporte@gangajuegos.com', 'Footer, ayuda, términos y privacidad. Vacío = no se muestra correo.'),
+    ('instagram_url', 'Perfil de Instagram', 'https://instagram.com/…', 'Enlaces a Instagram del sitio.'),
+]
+
+
+def _contact_errors(post):
+    from django.core.exceptions import ValidationError
+    from django.core.validators import EmailValidator, URLValidator
+
+    from apps.store.whatsapp import clean_number
+
+    values, errors = {}, {}
+    for name, label, _, _ in CONTACT_NUMBER_FIELDS:
+        raw = post.get(name, '').strip()
+        digits = clean_number(raw)
+        if raw and not 10 <= len(digits) <= 15:
+            errors[name] = 'Usa solo dígitos con código de país (10 a 15), ej: 573001234567.'
+        elif name == 'whatsapp_number' and not digits:
+            errors[name] = 'El número principal es obligatorio.'
+        values[name] = digits
+    for name, _, _, _ in CONTACT_TEXT_FIELDS:
+        raw = post.get(name, '').strip()
+        values[name] = raw
+        if not raw:
+            continue
+        try:
+            (EmailValidator() if name == 'support_email' else URLValidator(schemes=['http', 'https']))(raw)
+        except ValidationError:
+            errors[name] = 'Correo no válido.' if name == 'support_email' else 'Enlace no válido (debe empezar con https://).'
+    return values, errors
+
+
+def tab_contacto(request):
+    from apps.catalog.models import SiteSettings
+    from apps.store.whatsapp import wa_link
+
+    ctx = base_context(request, 'contacto')
+    row = SiteSettings.load_fresh()
+    values, errors = {f[0]: getattr(row, f[0]) for f in CONTACT_NUMBER_FIELDS + CONTACT_TEXT_FIELDS}, {}
+    if request.method == 'POST':
+        values, errors = _contact_errors(request.POST)
+        if not errors:
+            for k, v in values.items():
+                setattr(row, k, v)
+            row.save(update_fields=list(values))
+            messages.success(request, 'Datos de contacto guardados. La tienda ya usa los nuevos.')
+            return redirect('gsadmin:dashboard_contacto')
+        messages.error(request, 'Revisa los campos marcados.')
+    ctx.update({
+        'numbers': [{'name': n, 'label': lb, 'help': h, 'value': values.get(n, ''), 'error': errors.get(n),
+                     'test_url': wa_link('Mensaje de prueba desde el panel de Ganga Juegos.', kind) if not request.method == 'POST' else ''}
+                    for n, lb, h, kind in CONTACT_NUMBER_FIELDS],
+        'texts': [{'name': n, 'label': lb, 'placeholder': ph, 'help': h, 'value': values.get(n, ''), 'error': errors.get(n),
+                   'type': 'email' if n == 'support_email' else 'url'}
+                  for n, lb, ph, h in CONTACT_TEXT_FIELDS],
+    })
+    return render(request, 'panel/contacto.html', ctx)

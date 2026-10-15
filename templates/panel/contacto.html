@@ -1,0 +1,36 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<form method="post" data-screen-label="Panel · Contacto" style="display:flex;flex-direction:column;gap:16px;margin:0;max-width:820px">
+  {% csrf_token %}
+  <div style="font-size:14px;line-height:21px;color:#4A5A78">Números y enlaces de contacto que usa la tienda. Los números van con código de país y sin el signo +, ej: <strong>573001234567</strong> (Colombia). Puedes pegarlos con espacios o guiones: se limpian solos.</div>
+
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:16px">
+    <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">WhatsApp</div>
+    {% for f in numbers %}
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:13px;font-weight:800">{{ f.label }}</span>
+        <span style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <input name="{{ f.name }}" value="{{ f.value }}" inputmode="tel" autocomplete="off" placeholder="573001234567" style="flex:1 1 240px;max-width:320px;height:40px;padding:0 12px;border:1px solid {% if f.error %}#C93000{% else %}#E6DED2{% endif %};border-radius:4px;background:#FCF8F3;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;outline:none">
+          {% if f.test_url %}<a href="{{ f.test_url }}" target="_blank" rel="noopener" style="font-size:13px;font-weight:700;color:#0B5D33">Probar ↗</a>{% endif %}
+        </span>
+        <span style="font-size:12px;color:{% if f.error %}#9A2A00{% else %}#4A5A78{% endif %}">{{ f.error|default:f.help }}</span>
+      </label>
+    {% endfor %}
+  </div>
+
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:16px">
+    <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">Comunidad y redes</div>
+    {% for f in texts %}
+      <label style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:13px;font-weight:800">{{ f.label }}</span>
+        <input name="{{ f.name }}" type="{{ f.type }}" value="{{ f.value }}" placeholder="{{ f.placeholder }}" autocomplete="off" style="width:100%;max-width:560px;height:40px;padding:0 12px;border:1px solid {% if f.error %}#C93000{% else %}#E6DED2{% endif %};border-radius:4px;background:#FCF8F3;font-size:14px;outline:none">
+        <span style="font-size:12px;color:{% if f.error %}#9A2A00{% else %}#4A5A78{% endif %}">{{ f.error|default:f.help }}</span>
+      </label>
+    {% endfor %}
+  </div>
+
+  <div>
+    <button type="submit" style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Guardar contacto</button>
+  </div>
+</form>
+{% endblock %}

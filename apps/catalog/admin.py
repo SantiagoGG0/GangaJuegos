@@ -163,7 +163,7 @@ class SiteSettingsForm(forms.ModelForm):
 class SiteSettingsAdmin(admin.ModelAdmin):
     form = SiteSettingsForm
     fieldsets = (
-        ('WhatsApp', {'fields': ('whatsapp_number', 'whatsapp_community_url')}),
+        ('WhatsApp', {'fields': ('whatsapp_number', 'whatsapp_button_number', 'whatsapp_support_number', 'whatsapp_community_url', 'support_email')}),
         ('Pasarelas de pago (carrito)', {'fields': ('mercadopago_enabled', 'paypal_enabled')}),
         ('Código de referido (carrito)', {'fields': ('referral_enabled', 'referral_reward_pct')}),
         ('Reseñas / Instagram (home)', {'fields': (
@@ -179,5 +179,5 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         return False
 
     def changelist_view(self, request, extra_context=None):
-        obj = SiteSettings.load()
+        obj = SiteSettings.load_fresh()
         return self.change_view(request, str(obj.pk), extra_context=extra_context)

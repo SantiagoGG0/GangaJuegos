@@ -513,7 +513,7 @@ def giftcards(request):
 def help_view(request):
     from .whatsapp import wa_link
 
-    issues = [{**h, 'link': wa_link(h['msg'])} for h in C.HELP_ISSUES]
+    issues = [{**h, 'link': wa_link(h['msg'], 'soporte')} for h in C.HELP_ISSUES]
     key = request.GET.get('issue', issues[0]['key'])
     sel = next((h for h in issues if h['key'] == key), issues[0])
     return render(request, 'store/help.html', {
@@ -750,7 +750,7 @@ def account(request):
             'id': p.ref.lstrip('#'), 'date': f'{fecha.day} {MESES[fecha.month - 1]} {fecha.year}',
             'title': title, 'sub': sub, 'total': money(p.total, currency, allow_free=False),
             'st': st, 'st_bg': st_bg, 'delivered': p.estado == 'Entregado', 'creds': creds,
-            'wa_link': wa_link(f'Hola, quiero consultar el estado de mi pedido {p.ref} ({title}).'),
+            'wa_link': wa_link(f'Hola, quiero consultar el estado de mi pedido {p.ref} ({title}).', 'soporte'),
         })
 
     referido, _ = Referido.get_or_create_for(user)
