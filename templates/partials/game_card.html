@@ -1,6 +1,6 @@
-<a href="{{ g.url }}" class="hv-card" data-tilt="10" {% if grid %}data-card="1" data-plat="{{ g.plat }}" data-genre="{{ g.genre_l }}" data-title="{{ g.title_l }}" data-deal="{% if g.has_disc %}1{% endif %}" data-sec="{{ g.sec_cop }}" data-disc="{{ g.disc_pct }}" data-rel="{{ g.rel }}"{% if not g.visible %} hidden{% endif %} {% endif %}style="cursor:pointer;display:flex;flex-direction:column;{% if rail %}width:var(--railCol);flex-shrink:0;margin-right:12px;{% else %}min-width:0;{% endif %}background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s,box-shadow .2s">
-  <div style="position:relative;aspect-ratio:3/4;{{ g.cover_bg }}">
-    {% if not g.has_cover %}<div class="gj-cover-label">{{ g.initials }}</div>{% endif %}
+<a href="{{ g.url }}" class="hv-card" data-tilt="10" {% if grid %}data-card="1" {% endif %}style="cursor:pointer;display:flex;flex-direction:column;{% if rail %}width:var(--railCol);flex-shrink:0;margin-right:12px;{% else %}min-width:0;{% endif %}background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s,box-shadow .2s">
+  <div style="position:relative;aspect-ratio:3/4;{% if g.has_cover %}background:#0A2B66{% else %}{{ g.cover_bg }}{% endif %}">
+    {% if g.has_cover %}<img src="{{ g.cover_url }}" alt="" loading="lazy" decoding="async" width="300" height="400" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">{% else %}<div class="gj-cover-label">{{ g.initials }}</div>{% endif %}
     {% if g.has_disc %}<span style="position:absolute;top:8px;right:-4px;padding:5px 10px 5px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 13px/1 'Archivo',sans-serif;transform:skewX(-12deg)">{{ g.disc }}</span>{% endif %}
   </div>
   <div style="padding:10px 10px 12px;display:flex;flex-direction:column;gap:6px;flex:1">

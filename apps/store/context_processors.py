@@ -1,6 +1,7 @@
 import json
 
-from apps.catalog.models import Cupon, Divisa, Juego, SiteSettings
+from apps.catalog import snapshot
+from apps.catalog.models import Cupon, Divisa, SiteSettings
 from apps.catalog.pricing import iso_label
 from apps.orders.cart import Cart
 
@@ -20,11 +21,15 @@ SOCIAL_PLACES = [
 ]
 
 
-def _countries(current_code):
+def _divisas():
     try:
-        divisas = list(Divisa.objects.all())
+        return list(Divisa.objects.all())
     except Exception:  # noqa: BLE001
-        divisas = []
+        return []
+
+
+def _countries(current_code):
+    divisas = list(snapshot.cached('divisas', _divisas))
     order = {c: i for i, c in enumerate(C.COUNTRY_ORDER)}
     divisas.sort(key=lambda d: order.get(d.codigo, 99))
     return [{
@@ -50,6 +55,29 @@ def promo_coupon(settings_row=None):
 def genre_count(games, genre):
     g = genre.lower()
     return sum(1 for x in games if g in x.genre.lower())
+
+
+def _menu_data(currency):
+    """Datos del menú, mega-menú y toast que dependen del catálogo. Se calculan
+    una vez por versión del catálogo y divisa (ver apps.catalog.snapshot)."""
+    games = snapshot.active_games()
+    shaped = snapshot.shaped_games(currency)
+    genres = [{'label': gn, 'count': genre_count(games, gn)} for gn in C.GENRES]
+    deal_games = sorted((g for g in games if g.discount_percent > 0), key=lambda g: -g.discount_percent)
+    feat_obj = next((g for g in games if g.featured), None) or (deal_games[0] if deal_games else (games[0] if games else None))
+    toast = {
+        'names': SOCIAL_NAMES,
+        'places': [{'city': city, 'flag': C.FLAGS.get(code, '#A9B8D6')} for city, code in SOCIAL_PLACES],
+        'games': [{'title': g.title, 'cover': shaped[g.pk]['cover_bg']} for g in games[:60]],
+    }
+    return {
+        'plats': [{'label': p, 'count': f'{sum(1 for g in games if p in g.platform)} juegos',
+                   'url': f'/catalogo/?platform={p}'} for p in ('PS5', 'PS4')],
+        'genres': [g for g in genres if g['count']],
+        'feat': shaped[feat_obj.pk] if feat_obj else None,
+        'deals3': [shaped[g.pk] for g in deal_games[:3]],
+        'toast_json': json.dumps(toast, ensure_ascii=False).replace('<', '\\u003c'),
+    }
 
 
 def global_context(request):
@@ -80,7 +108,6 @@ def global_context(request):
         return base
 
     from apps.catalog.offers import expire_offers
-    from apps.catalog.presentation import shape_game
     expire_offers()
 
     current_code = request.session.get('currency', 'COP')
@@ -89,11 +116,6 @@ def global_context(request):
                                                                 {'code': 'COP', 'iso': 'COP', 'name': 'Colombia', 'flag': C.FLAGS['COP'], 'dial': '+57'})
     if current_code not in {c['code'] for c in countries}:
         current_code = current['code']
-
-    try:
-        games = list(Juego.objects.filter(active=True).select_related('cover'))
-    except Exception:  # noqa: BLE001
-        games = []
 
     url_name = getattr(getattr(request, 'resolver_match', None), 'url_name', None)
     nav_key = {'catalog': 'catalog', 'deals': 'deals', 'combos': 'combos', 'plus': 'plus', 'giftcards': 'gift'}.get(url_name)
@@ -107,22 +129,8 @@ def global_context(request):
     for n in nav:
         n['active'] = n['key'] == nav_key
 
-    def plat_count(p):
-        return sum(1 for g in games if p in g.platform)
-
-    genres = [{'label': gn, 'count': genre_count(games, gn)} for gn in C.GENRES]
-    genres = [g for g in genres if g['count']]
-
-    deal_games = sorted((g for g in games if g.discount_percent > 0), key=lambda g: -g.discount_percent)
-    feat_obj = next((g for g in games if g.featured), None) or (deal_games[0] if deal_games else (games[0] if games else None))
-
+    menu = snapshot.cached(('menu', current_code), lambda: _menu_data(current_code))
     promo = promo_coupon(settings_row)
-
-    toast = {
-        'names': SOCIAL_NAMES,
-        'places': [{'city': city, 'flag': C.FLAGS.get(code, '#A9B8D6')} for city, code in SOCIAL_PLACES],
-        'games': [{'title': g.title, 'cover': shape_game(g)['cover_bg']} for g in games[:60]],
-    }
 
     names = [c['name'] for c in countries]
     countries_text = (', '.join(names[:-1]) + ' y ' + names[-1]) if len(names) > 1 else ''.join(names)
@@ -135,10 +143,10 @@ def global_context(request):
         'countries_text': countries_text,
         'nav': nav,
         'nav_key': nav_key,
-        'mega_plats': [{'label': p, 'count': f'{plat_count(p)} juegos', 'url': f'/catalogo/?platform={p}'} for p in ('PS5', 'PS4')],
-        'mega_genres': genres,
-        'mega_feat': shape_game(feat_obj, currency=current_code) if feat_obj else None,
-        'mega_deals3': [shape_game(g, currency=current_code) for g in deal_games[:3]],
+        'mega_plats': menu['plats'],
+        'mega_genres': menu['genres'],
+        'mega_feat': menu['feat'],
+        'mega_deals3': menu['deals3'],
         'deal_links': [
             {'label': 'Todas las ofertas', 'url': '/ofertas/'},
             {'label': 'Ofertas PS5', 'url': '/ofertas/?platform=PS5'},
@@ -148,7 +156,7 @@ def global_context(request):
         'promo': promo,
         'overlay_toast': url_name in ('home', 'catalog', 'deals', 'combos', 'plus', 'giftcards'),
         'overlay_promo': bool(promo) and url_name in ('home', 'catalog', 'deals'),
-        'toast_json': json.dumps(toast, ensure_ascii=False).replace('<', '\\u003c'),
+        'toast_json': menu['toast_json'],
         'whatsapp_channel_link': settings_row.whatsapp_community_url or wa_link('Hola, quiero unirme al canal de ofertas de Ganga Juegos.'),
         'instagram_url': settings_row.instagram_url,
     })

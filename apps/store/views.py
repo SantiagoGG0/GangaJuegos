@@ -3,13 +3,14 @@ import re
 
 from django.contrib import messages
 from django.db.models import Sum
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from apps.catalog import snapshot
 from apps.catalog.models import Juego
-from apps.catalog.presentation import GIFT_ARTS, shape_game, shape_queryset
+from apps.catalog.presentation import GIFT_ARTS, shape_game
 from apps.catalog.pricing import money
 
 from . import constants as C
@@ -57,7 +58,8 @@ def _ranked(games):
 
 
 def _active_games():
-    return list(Juego.objects.filter(active=True).select_related('cover').order_by('title'))
+    """Juegos activos desde la caché del catálogo (lista compartida: no mutar)."""
+    return snapshot.active_games()
 
 
 def _plat_match(game_plat, plat):
@@ -73,12 +75,14 @@ def _faq():
 
 # ---------------------------------------------------------------- home
 
+HOME_RAIL = 12  # juegos del riel de ofertas del home (se repite para el loop)
+
 def home(request):
     from apps.catalog.models import GiftCard, HeroVideo, PlusPlan, SiteSettings, Testimonial
 
     currency = _currency(request)
     games = _active_games()
-    shaped = {g.pk: shape_game(g, currency=currency) for g in games}
+    shaped = snapshot.shaped_games(currency)
 
     slides = []
     for hv in HeroVideo.objects.filter(active=True, juego__active=True).select_related('juego', 'juego__cover').order_by('order', 'id'):
@@ -94,7 +98,7 @@ def home(request):
         slides = [{**_slide(g), 'video': '', 'image': g['cover_url']} for g in feat]
 
     ranked = _ranked(games)
-    deals = [shaped[g.pk] for g in sorted(games, key=lambda g: -g.discount_percent) if g.discount_percent > 0]
+    deals = [shaped[g.pk] for g in sorted(games, key=lambda g: -g.discount_percent) if g.discount_percent > 0][:HOME_RAIL]
     if not deals:
         deals = [shaped[g.pk] for g in ranked[:10]]
 
@@ -163,24 +167,38 @@ def search_api(request):
     if len(q) < 2:
         return JsonResponse({'results': [], 'total': 0})
     currency = _currency(request)
-    hits = [g for g in Juego.objects.filter(active=True).select_related('cover') if q in g.title.lower()]
+    hits = [g for g in _active_games() if q in g.title.lower()]
+    shaped = snapshot.shaped_games(currency)
     results = []
     for g in hits[:8]:
-        s = shape_game(g, currency=currency)
+        s = shaped[g.pk]
         results.append({'title': s['title'], 'plat': s['plat'], 'from': s['from'], 'url': s['url'], 'cover': s['cover_bg']})
     return JsonResponse({'results': results, 'total': len(hits)})
 
 
 # ------------------------------------------------------------- catálogo
 
+CATALOG_PAGE = 48  # tarjetas por tanda (el resto se agrega al hacer scroll)
+
+
+def _catalog_order():
+    """Orden base ("Relevancia"): destacados primero y luego por título."""
+    return snapshot.cached('catalog_order', lambda: sorted(_active_games(), key=lambda x: (not x.featured, x.title.lower())))
+
+
+def _catalog_genres():
+    from .context_processors import genre_count
+    return snapshot.cached('catalog_genres', lambda: ['Todos'] + [gn for gn in C.GENRES if genre_count(_active_games(), gn)])
+
+
 def _catalog_ctx(request, force_deals=False):
     """Catálogo y Ofertas comparten pantalla (en el diseño Ofertas es el
-    catálogo con el filtro "Solo ofertas"). Se pintan todos los juegos y el
-    filtrado/orden es instantáneo en el navegador (static/js/ganga-store.js);
-    el servidor aplica el estado inicial que llega por la URL para que la
-    página funcione igual sin JavaScript y sea enlazable."""
-    from .context_processors import genre_count
-
+    catálogo con el filtro "Solo ofertas"). El servidor pinta solo la primera
+    tanda de tarjetas según el estado de la URL; el navegador descarga el
+    catálogo completo como JSON cacheable (`catalog_data`) y filtra, ordena y
+    agrega tandas al hacer scroll sin volver al servidor
+    (static/js/ganga-store.js). Sin JavaScript, "Ver más juegos" pagina con
+    ?page=N."""
     currency = _currency(request)
     g = request.GET
     plat = g.get('platform', 'Todos')
@@ -194,34 +212,40 @@ def _catalog_ctx(request, force_deals=False):
     if sort not in C.SORTS:
         sort = 'Relevancia'
     query = g.get('q', '').strip()
+    try:
+        page = max(1, min(int(g.get('page', 1)), 1000))
+    except ValueError:
+        page = 1
 
-    games = _active_games()
-    games.sort(key=lambda x: (not x.featured, x.title.lower()))
-    genres = ['Todos'] + [gn for gn in C.GENRES if genre_count(games, gn)]
+    genres = _catalog_genres()
     if genre not in genres:
         genre = 'Todos'
 
-    q = query.lower()
-    items = []
-    for rel, x in enumerate(games):
-        s = shape_game(x, currency=currency)
-        s['rel'] = rel
-        s['genre_l'] = x.genre.lower()
-        s['title_l'] = x.title.lower()
-        s['visible'] = (_plat_match(x.platform, plat)
-                        and (genre == 'Todos' or genre.lower() in s['genre_l'])
-                        and (not only_deals or s['has_disc'])
-                        and (not q or q in s['title_l']))
-        items.append(s)
+    shaped = snapshot.shaped_games(currency)
+    q, genre_l = query.lower(), genre.lower()
+    items = [shaped[x.pk] for x in _catalog_order()
+             if _plat_match(x.platform, plat)
+             and (genre == 'Todos' or genre_l in x.genre.lower())
+             and (not only_deals or x.discount_percent > 0)
+             and (not q or q in x.title.lower())]
     if sort == 'Menor precio':
         items.sort(key=lambda s: s['sec_cop'])
     elif sort == 'Mayor descuento':
         items.sort(key=lambda s: -s['disc_pct'])
-    count = sum(1 for s in items if s['visible'])
+    shown = items[:CATALOG_PAGE * page]
+
+    more_url = ''
+    if len(shown) < len(items):
+        params = g.copy()
+        params['page'] = page + 1
+        more_url = '?' + params.urlencode()
 
     return {
-        'games': items,
-        'result_count': count,
+        'games': shown,
+        'result_count': len(items),
+        'more_url': more_url,
+        'catalog_page': CATALOG_PAGE,
+        'data_url': f"{reverse('store:catalog_data')}?cur={currency}&v={snapshot.version()}",
         'catalog_title': 'Ofertas' if only_deals else 'Catálogo',
         'f_plat': plat, 'f_genre': genre, 'f_sort': sort, 'f_deals': only_deals, 'f_query': query,
         'plats': ['Todos', 'PS5', 'PS4'],
@@ -238,6 +262,35 @@ def deals(request):
     return render(request, 'store/catalog.html', _catalog_ctx(request, force_deals=True))
 
 
+def catalog_data(request):
+    """Catálogo completo en JSON compacto para filtrar en el navegador. La URL
+    lleva la versión del catálogo y la divisa, así que el navegador la cachea;
+    cuando algo cambia, la página pide una URL nueva."""
+    from .context_processors import _countries
+
+    currency = request.GET.get('cur', 'COP')
+    if currency not in {c['code'] for c in _countries(currency)}:
+        currency = 'COP'
+
+    def build():
+        shaped = snapshot.shaped_games(currency)
+        rows = []
+        for x in _catalog_order():
+            s = shaped[x.pk]
+            row = {'u': s['url'], 't': s['title'], 'p': s['plat'], 'g': x.genre.lower(),
+                   'a': s['prim'], 'b': s['sec'], 's': s['sec_cop'], 'dp': s['disc_pct']}
+            if s['has_cover']:
+                row['c'] = s['cover_url']
+            else:
+                row['bg'], row['i'] = s['cover_bg'], s['initials']
+            rows.append(row)
+        return json.dumps(rows, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+
+    response = HttpResponse(snapshot.cached(('catalog_json', currency), build), content_type='application/json')
+    response['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+
 # --------------------------------------------------------------- detalle
 
 def detail(request, slug):
@@ -252,6 +305,7 @@ def detail(request, slug):
     related = [x for x in others if (x.genre == juego.genre or x.platform == juego.platform)][:6]
     if len(related) < 6:
         related += [x for x in others if x not in related][:6 - len(related)]
+    shaped = snapshot.shaped_games(currency)
 
     ctx = {
         'game': game,
@@ -260,7 +314,7 @@ def detail(request, slug):
             {'id': 'secundaria', 'name': 'Secundaria', 'price': game['sec'], 'sum': 'Juegas desde el usuario que te entregamos, siempre conectado.', 'tag': f"Ahorras {game['savings']}", 'tag_bg': '#FC8B01'},
         ],
         'compare': C.COMPARE,
-        'related': shape_queryset(related, currency=currency),
+        'related': [shaped[x.pk] for x in related if x.pk in shaped],
     }
     return render(request, 'store/detail.html', ctx)
 

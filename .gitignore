@@ -19,3 +19,6 @@ design-export.zip
 *.code-workspace
 Thumbs.db
 .DS_Store
+
+# Testigo de la caché del catálogo (apps/catalog/snapshot.py)
+.catalog_version

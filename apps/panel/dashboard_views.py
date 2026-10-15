@@ -255,6 +255,8 @@ def catalog_bulk(request):
     elif action in BULK_ACTIONS:
         label, fields = BULK_ACTIONS[action]
         qs.update(**fields)
+        from apps.catalog import snapshot
+        snapshot.bump()
         messages.success(request, f'{count} juego(s) {label}.')
     else:
         messages.error(request, 'Elige una acción.')

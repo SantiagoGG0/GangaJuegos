@@ -1,5 +1,6 @@
 import datetime
 import os
+import uuid
 
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -61,8 +62,10 @@ class Juego(models.Model):
 
 
 def cover_upload_to(instance, filename):
+    # Nombre único por versión: nginx sirve /media/ con caché larga en el
+    # navegador, así que una carátula nueva debe tener una URL nueva.
     ext = os.path.splitext(filename)[1].lower() or '.jpg'
-    return f'covers/{instance.juego.slug}{ext}'
+    return f'covers/{instance.juego.slug}-{uuid.uuid4().hex[:8]}{ext}'
 
 
 class Cover(models.Model):

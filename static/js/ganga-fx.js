@@ -91,8 +91,20 @@
   }
 
   /* ---------- 3D tilt ---------- */
+  // Se prepara en la primera interacción (no al cargar): con cientos de
+  // tarjetas, medir estilos y crear capas para todas bloqueaba la página.
   function tilt(el) {
     if (RM || !once(el, 'tl')) return;
+    var init = function (e) {
+      el.removeEventListener('pointerenter', init);
+      el.removeEventListener('pointerdown', init);
+      setupTilt(el);
+      el.dispatchEvent(new PointerEvent(e.type, { bubbles: false, pointerType: e.pointerType, clientX: e.clientX, clientY: e.clientY }));
+    };
+    el.addEventListener('pointerenter', init);
+    el.addEventListener('pointerdown', init);
+  }
+  function setupTilt(el) {
     ensureBox(el);
     if (getComputedStyle(el).overflow === 'visible') el.style.overflow = 'hidden';
     if (!el.style.isolation) el.style.isolation = 'isolate';

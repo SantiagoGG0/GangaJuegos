@@ -24,4 +24,5 @@ urlpatterns = [
     path('moneda/', views.set_currency, name='set_currency'),
     path('modo-precio/', views.set_price_mode, name='set_price_mode'),
     path('buscar/', views.search_api, name='search_api'),
+    path('catalogo/datos.json', views.catalog_data, name='catalog_data'),
 ]

@@ -7,22 +7,26 @@ from django.utils.html import format_html
 
 from apps.panel.admin_site import gs_admin_site
 
+from . import snapshot
 from .models import Combo, Cover, Cupon, Divisa, GiftCard, HeroVideo, Juego, PlusPlan, SaldoCodigo, SiteEvent, SiteSettings, Testimonial, TierInfo
 
 
 @admin.action(description='Marcar como activo')
 def marcar_activo(modeladmin, request, queryset):
     queryset.update(active=True)
+    snapshot.bump()
 
 
 @admin.action(description='Marcar como inactivo')
 def marcar_inactivo(modeladmin, request, queryset):
     queryset.update(active=False)
+    snapshot.bump()
 
 
 @admin.action(description='Marcar como destacado')
 def marcar_destacado(modeladmin, request, queryset):
     queryset.update(featured=True)
+    snapshot.bump()
 
 
 class CoverInline(admin.StackedInline):

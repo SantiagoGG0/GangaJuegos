@@ -347,7 +347,11 @@
   /* ------------------------------------------------------------ catálogo */
   (function () {
     var root = $('[data-catalog]'); if (!root) return;
-    var grid = $('[data-grid]', root), cards = $$('[data-card]', grid);
+    // El servidor pinta la primera tanda; el catálogo completo llega como JSON
+    // (cacheable) y desde ahí se filtra, ordena y se agregan tandas al hacer scroll.
+    var grid = $('[data-grid]', root), more = $('[data-more]', root);
+    var BATCH = +root.getAttribute('data-batch') || 48;
+    var data = null, list = [], shown = grid.children.length, pending = false;
     var st = { plat: root.getAttribute('data-plat') || 'Todos', genre: root.getAttribute('data-genre') || 'Todos', sort: root.getAttribute('data-sort') || 'Relevancia', deals: !!root.getAttribute('data-deals') };
     var qInput = $('[data-f-query]', root), sortSel = $('[data-f-sort]', root);
     st.q = qInput ? qInput.value.trim() : '';
@@ -356,21 +360,56 @@
       if (b.hasAttribute('data-chip')) css(b, { background: on ? '#FC8B01' : 'transparent', color: on ? NAVY : CREAM, borderColor: on ? '#FC8B01' : LINE_D });
       else css(b, { borderLeftColor: on ? '#FC8B01' : 'transparent', color: on ? '#FCC602' : CREAM, fontWeight: on ? '700' : '500' });
     }
+    var ROW = 'display:flex;justify-content:space-between;align-items:baseline;gap:4px';
+    var LBL = 'font-size:11px;font-weight:600;color:#4A5A78';
+    var PRICE = 'font-size:15px;font-weight:800;font-variant-numeric:tabular-nums';
+    function card(g) {
+      // Mismo marcado que templates/partials/game_card.html
+      var cover = g.c
+        ? '<div style="position:relative;aspect-ratio:3/4;background:#0A2B66"><img src="' + esc(g.c) + '" alt="" loading="lazy" decoding="async" width="300" height="400" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
+        : '<div style="position:relative;aspect-ratio:3/4;' + esc(g.bg) + '"><div class="gj-cover-label">' + esc(g.i) + '</div>';
+      var disc = g.dp > 0 ? '<span style="position:absolute;top:8px;right:-4px;padding:5px 10px 5px 8px;background:linear-gradient(90deg,#FC3C00,#FC8B01);color:#011E4F;font:italic 900 13px/1 \'Archivo\',sans-serif;transform:skewX(-12deg)">-' + g.dp + '%</span>' : '';
+      return '<a href="' + esc(g.u) + '" class="hv-card" data-tilt="10" data-card="1" style="cursor:pointer;display:flex;flex-direction:column;min-width:0;background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s,box-shadow .2s">' +
+        cover + disc + '</div>' +
+        '<div style="padding:10px 10px 12px;display:flex;flex-direction:column;gap:6px;flex:1">' +
+        '<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4A5A78">' + esc(g.p) + '</div>' +
+        '<div style="font-size:14px;line-height:18px;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px">' + esc(g.t) + '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;margin-top:auto;padding-top:6px;border-top:1px solid #E6DED2">' +
+        '<div style="' + ROW + '"><span style="' + LBL + '">Primaria</span><span style="' + PRICE + '">' + esc(g.a) + '</span></div>' +
+        '<div style="' + ROW + '"><span style="' + LBL + '">Secundaria</span><span style="' + PRICE + ';color:#C93000">' + esc(g.b) + '</span></div>' +
+        '</div></div></a>';
+    }
+    function filter() {
+      var q = st.q.toLowerCase(), g = st.genre.toLowerCase();
+      list = data.filter(function (x) {
+        return (st.plat === 'Todos' || x.p.indexOf(st.plat) !== -1) &&
+          (st.genre === 'Todos' || x.g.indexOf(g) !== -1) &&
+          (!st.deals || x.dp > 0) &&
+          (!q || x.tl.indexOf(q) !== -1);
+      });
+      if (st.sort === 'Menor precio') list.sort(function (a, b) { return a.s - b.s || a.r - b.r; });
+      else if (st.sort === 'Mayor descuento') list.sort(function (a, b) { return b.dp - a.dp || a.r - b.r; });
+    }
+    function renderMore() {
+      if (!data || shown >= list.length) return;
+      grid.insertAdjacentHTML('beforeend', list.slice(shown, shown + BATCH).map(card).join(''));
+      shown = Math.min(list.length, shown + BATCH);
+      if (more) more.hidden = shown >= list.length;
+    }
+    if (more) {
+      more.addEventListener('click', function (e) { if (data) { e.preventDefault(); renderMore(); } });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) { if (es[0].isIntersecting) renderMore(); }, { rootMargin: '900px 0px' }).observe(more);
+      }
+    }
     function apply() {
-      var q = st.q.toLowerCase(), g = st.genre.toLowerCase(), n = 0;
-      cards.forEach(function (c) {
-        var ok = (st.plat === 'Todos' || c.getAttribute('data-plat').indexOf(st.plat) !== -1) &&
-          (st.genre === 'Todos' || c.getAttribute('data-genre').indexOf(g) !== -1) &&
-          (!st.deals || c.getAttribute('data-deal')) &&
-          (!q || c.getAttribute('data-title').indexOf(q) !== -1);
-        c.hidden = !ok; if (ok) n++;
-      });
-      var sorted = cards.slice().sort(function (a, b) {
-        if (st.sort === 'Menor precio') return (+a.getAttribute('data-sec')) - (+b.getAttribute('data-sec'));
-        if (st.sort === 'Mayor descuento') return (+b.getAttribute('data-disc')) - (+a.getAttribute('data-disc')) || (+a.getAttribute('data-rel')) - (+b.getAttribute('data-rel'));
-        return (+a.getAttribute('data-rel')) - (+b.getAttribute('data-rel'));
-      });
-      sorted.forEach(function (c) { grid.appendChild(c); });
+      if (!data) { pending = true; return; }
+      filter();
+      var n = list.length;
+      grid.innerHTML = '';
+      shown = 0;
+      renderMore();
+      if (more) more.hidden = shown >= n;
       $$('[data-result-count]').forEach(function (el) { el.textContent = n; });
       var title = $('[data-catalog-title]', root); if (title) title.textContent = st.deals ? 'Ofertas' : 'Catálogo';
       var banner = $('[data-deals-banner]', root); if (banner) banner.hidden = !st.deals;
@@ -383,7 +422,7 @@
         if (k === 'catalog' || k === 'deals') css(a, { color: on ? '#FCC602' : CREAM, borderBottomColor: on ? '#FCC602' : 'transparent' });
       });
       if (!first) {
-        grid.setAttribute('data-restagger', [st.plat, st.genre, st.sort, st.deals, q].join('|'));
+        grid.setAttribute('data-restagger', [st.plat, st.genre, st.sort, st.deals, st.q].join('|'));
         var p = new URLSearchParams();
         if (st.plat !== 'Todos') p.set('platform', st.plat);
         if (st.genre !== 'Todos') p.set('genre', st.genre);
@@ -401,7 +440,19 @@
     if (qInput) qInput.addEventListener('input', function () { st.q = qInput.value.trim(); apply(); });
     var clear = $('[data-clear-filters]', root);
     if (clear) clear.addEventListener('click', function (e) { e.preventDefault(); st.plat = 'Todos'; st.genre = 'Todos'; st.deals = false; st.q = ''; if (qInput) qInput.value = ''; apply(); });
-    apply();
+    first = false;
+    fetch(root.getAttribute('data-src'), { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) {
+        d.forEach(function (x, i) { x.r = i; x.tl = x.t.toLowerCase(); });
+        data = d;
+        if (pending) { apply(); return; }
+        // Sin interacción todavía: las tarjetas del servidor ya son la primera tanda.
+        filter();
+        shown = Math.min(shown, list.length);
+        if (more) more.hidden = shown >= list.length;
+      })
+      .catch(function () { /* sin datos, queda la paginación normal con "Ver más juegos" */ });
   })();
 
   /* ------------------------------------------------------------- PS Plus */
