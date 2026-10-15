@@ -192,3 +192,68 @@ class CoverResizeTests(TestCase):
     def test_small_cover_is_not_enlarged(self):
         img = Image.open(io.BytesIO(pb._web_image(_png()).read()))
         self.assertEqual(img.size, (20, 30))
+
+
+@override_settings(STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class CatalogEditTests(TestCase):
+    def setUp(self):
+        self.media = tempfile.mkdtemp()
+        self.override = override_settings(MEDIA_ROOT=self.media)
+        self.override.enable()
+        self.client.force_login(get_user_model().objects.create_superuser('a@a.co', 'x', nombre='Admin'))
+        self.games = [Juego.objects.create(title=f'Juego {i}', slug=f'juego-{i}', platform='PS5', genre='RPG',
+                                           price_primary=100000, price_secondary=50000) for i in range(3)]
+        cover = Cover.objects.create(juego=self.games[0], image=ContentFile(_png(), name='c.png'))
+        self.cover_path = cover.image.path
+
+    def tearDown(self):
+        self.override.disable()
+        shutil.rmtree(self.media, ignore_errors=True)
+
+    def test_catalog_page_shows_controls(self):
+        page = self.client.get(reverse('gsadmin:dashboard_catalogo'))
+        self.assertContains(page, 'Eliminar todo el catálogo')
+        self.assertContains(page, reverse('gsadmin:dashboard_juego_delete', args=[self.games[1].pk]))
+
+    def test_delete_one_removes_cover_file(self):
+        import os
+        self.client.post(reverse('gsadmin:dashboard_juego_delete', args=[self.games[0].pk]))
+        self.assertFalse(Juego.objects.filter(pk=self.games[0].pk).exists())
+        self.assertFalse(os.path.exists(self.cover_path))
+        self.assertEqual(Juego.objects.count(), 2)
+
+    def test_bulk_actions(self):
+        ids = [self.games[0].pk, self.games[1].pk]
+        url = reverse('gsadmin:dashboard_catalog_bulk')
+        self.client.post(url, {'action': 'ocultar', 'ids': ids})
+        self.assertEqual(Juego.objects.filter(active=False).count(), 2)
+        self.client.post(url, {'action': 'destacar', 'ids': ids})
+        self.assertEqual(Juego.objects.filter(featured=True).count(), 2)
+        self.client.post(url, {'action': 'eliminar', 'ids': ids})
+        self.assertEqual(list(Juego.objects.values_list('pk', flat=True)), [self.games[2].pk])
+
+    def test_delete_all_requires_confirmation(self):
+        url = reverse('gsadmin:dashboard_catalog_delete_all')
+        self.client.post(url, {'confirm': 'si'})
+        self.assertEqual(Juego.objects.count(), 3)
+        self.client.post(url, {'confirm': 'eliminar todo'})
+        self.assertEqual(Juego.objects.count(), 0)
+        self.assertEqual(Cover.objects.count(), 0)
+
+    def test_delete_keeps_orders(self):
+        from apps.orders.models import ItemPedido, Pedido
+        user = get_user_model().objects.create_user('c@c.co', 'x', nombre='C')
+        field_names = {f.name for f in Pedido._meta.get_fields()}
+        self.assertIn('usuario', field_names)
+        try:
+            pedido = Pedido.objects.create(usuario=user, total=50000)
+        except Exception as e:  # noqa: BLE001
+            self.skipTest(f'Pedido requiere más campos: {e}')
+        ItemPedido.objects.create(pedido=pedido, juego=self.games[1], precio_unitario=50000)
+        self.client.post(reverse('gsadmin:dashboard_catalog_delete_all'), {'confirm': 'ELIMINAR TODO'})
+        item = ItemPedido.objects.get()
+        self.assertIsNone(item.juego)
+        self.assertEqual(item.titulo, 'Juego 1')

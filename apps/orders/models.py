@@ -71,7 +71,7 @@ class ItemPedido(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.titulo and self.juego:
-            self.titulo = self.juego.title
+            self.titulo = self.juego.title[:160]
         super().save(*args, **kwargs)
 
 

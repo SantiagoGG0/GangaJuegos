@@ -66,6 +66,31 @@
     });
   }
 
+  // Confirmación antes de enviar formularios destructivos
+  $$('form[data-confirm]').forEach(function (f) {
+    f.addEventListener('submit', function (e) { if (!window.confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
+  });
+
+  // Catálogo: selección de filas y acciones masivas
+  var bulk = $('[data-bulk-form]');
+  if (bulk) {
+    var checks = $$('[data-row-check]'), all = $('[data-select-all]'), apply = $('[data-bulk-apply]', bulk);
+    var refresh = function () {
+      var n = checks.filter(function (c) { return c.checked; }).length;
+      $('[data-bulk-count]', bulk).textContent = n;
+      apply.disabled = !n;
+      if (all) { all.checked = n > 0 && n === checks.length; all.indeterminate = n > 0 && n < checks.length; }
+    };
+    checks.forEach(function (c) { c.addEventListener('change', refresh); });
+    if (all) all.addEventListener('change', function () { checks.forEach(function (c) { c.checked = all.checked; }); refresh(); });
+    bulk.addEventListener('submit', function (e) {
+      var action = bulk.elements.action.value, n = $('[data-bulk-count]', bulk).textContent;
+      if (!action) { e.preventDefault(); window.alert('Elige una acción.'); return; }
+      if (action === 'eliminar' && !window.confirm('¿Eliminar ' + n + ' juego(s)? Esta acción no se puede deshacer.')) e.preventDefault();
+    });
+    refresh();
+  }
+
   // Carga masiva: la importación va por tandas; se encadena la siguiente sola
   var auto = $('[data-auto-submit]');
   if (auto) {

@@ -8,6 +8,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -180,12 +181,13 @@ def tab_catalogo(request):
         'pk': g.pk, 'title': g.title, 'plat': g.platform, 'genre': g.genre, 'cover_bg': cover_background(g),
         'prim': money(g.price_primary, allow_free=False), 'sec': money(g.price_secondary, allow_free=False),
         'old': money(g.old_price_primary, allow_free=False) if g.old_price_primary else '—',
-        'active': g.active, 'edit_url': reverse('gsadmin:catalog_juego_change', args=[g.pk]),
+        'active': g.active, 'featured': g.featured, 'edit_url': reverse('gsadmin:catalog_juego_change', args=[g.pk]),
     } for g in qs]
     extra = f'&q={q}' if q else ''
     ctx.update({
         'q': q, 'plat_filters': _seg([('Todos', 'Todos'), ('PS5', 'PS5'), ('PS4', 'PS4')], plat, 'plat', extra),
         'rows': rows, 'count': len(rows), 'new_url': reverse('gsadmin:catalog_juego_add'),
+        'total': Juego.objects.count(), 'delete_confirm': DELETE_ALL_CONFIRM,
     })
     return render(request, 'panel/catalogo.html', ctx)
 
@@ -196,6 +198,78 @@ def toggle_juego_active(request, pk):
     juego.active = not juego.active
     juego.save(update_fields=['active'])
     return redirect(request.META.get('HTTP_REFERER') or reverse('gsadmin:dashboard_catalogo'))
+
+
+DELETE_ALL_CONFIRM = 'ELIMINAR TODO'
+
+
+def _back_to_catalog(request):
+    return redirect(request.META.get('HTTP_REFERER') or reverse('gsadmin:dashboard_catalogo'))
+
+
+def _delete_juegos(qs):
+    """Borra los juegos y los archivos de sus carátulas y videos del hero (Django
+    no borra los archivos al borrar el registro). Los pedidos se conservan: el
+    ítem guarda el título y queda sin juego enlazado."""
+    from apps.catalog.models import Cover, HeroVideo
+    files = [c.image for c in Cover.objects.filter(juego__in=qs) if c.image]
+    for hv in HeroVideo.objects.filter(juego__in=qs):
+        files += [f for f in (hv.video, hv.poster) if f]
+    with transaction.atomic():
+        qs.delete()
+    for f in files:
+        try:
+            f.storage.delete(f.name)
+        except Exception:  # noqa: BLE001
+            pass
+
+
+@require_POST
+def juego_delete(request, pk):
+    juego = get_object_or_404(Juego, pk=pk)
+    title = juego.title
+    _delete_juegos(Juego.objects.filter(pk=pk))
+    messages.success(request, f'Juego eliminado: {title}.')
+    return _back_to_catalog(request)
+
+
+BULK_ACTIONS = {
+    'activar': ('activados', {'active': True}),
+    'ocultar': ('ocultados', {'active': False}),
+    'destacar': ('marcados como destacados', {'featured': True}),
+    'quitar_destacado': ('sin destacar', {'featured': False}),
+}
+
+
+@require_POST
+def catalog_bulk(request):
+    ids = [int(i) for i in request.POST.getlist('ids') if i.isdigit()]
+    action = request.POST.get('action', '')
+    qs = Juego.objects.filter(pk__in=ids)
+    count = qs.count()
+    if not count:
+        messages.error(request, 'Selecciona al menos un juego.')
+    elif action == 'eliminar':
+        _delete_juegos(qs)
+        messages.success(request, f'{count} juego(s) eliminados.')
+    elif action in BULK_ACTIONS:
+        label, fields = BULK_ACTIONS[action]
+        qs.update(**fields)
+        messages.success(request, f'{count} juego(s) {label}.')
+    else:
+        messages.error(request, 'Elige una acción.')
+    return _back_to_catalog(request)
+
+
+@require_POST
+def catalog_delete_all(request):
+    if request.POST.get('confirm', '').strip().upper() != DELETE_ALL_CONFIRM:
+        messages.error(request, f'Para eliminar todo el catálogo escribe exactamente "{DELETE_ALL_CONFIRM}".')
+        return redirect('gsadmin:dashboard_catalogo')
+    count = Juego.objects.count()
+    _delete_juegos(Juego.objects.all())
+    messages.success(request, f'Catálogo eliminado: {count} juego(s) borrados con sus carátulas.')
+    return redirect('gsadmin:dashboard_catalogo')
 
 
 # ---------------------------------------------------------------- Ofertas

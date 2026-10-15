@@ -15,15 +15,29 @@
     <span style="font-size:13px;color:#4A5A78">{{ count }} juegos</span>
     <a href="{{ new_url }}" style="height:40px;padding:0 16px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer;display:flex;align-items:center">+ Nuevo juego</a>
   </div>
+  <form method="post" id="bulk-form" action="{% url 'gsadmin:dashboard_catalog_bulk' %}" data-bulk-form="1" style="margin:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;background:#fff;border:1px solid #E6DED2;border-radius:8px">
+    {% csrf_token %}
+    <span style="font-size:13px;font-weight:700"><span data-bulk-count>0</span> seleccionados</span>
+    <select name="action" style="height:36px;padding:0 10px;border:1px solid #E6DED2;border-radius:4px;background:#fff;font-size:13px">
+      <option value="">Acción…</option>
+      <option value="activar">Activar</option>
+      <option value="ocultar">Ocultar</option>
+      <option value="destacar">Marcar como destacado</option>
+      <option value="quitar_destacado">Quitar destacado</option>
+      <option value="eliminar">Eliminar</option>
+    </select>
+    <button type="submit" data-bulk-apply disabled style="height:36px;padding:0 14px;border:1px solid #011E4F;border-radius:4px;background:transparent;color:#011E4F;font-size:13px;font-weight:700;cursor:pointer">Aplicar</button>
+  </form>
   <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
-    <div style="min-width:1000px">
-      <div style="display:grid;grid-template-columns:44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 60px;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
-        <div></div><div>Juego</div><div>Plat.</div><div>Género</div><div style="text-align:right">Primaria</div><div style="text-align:right">Secundaria</div><div style="text-align:right">Antes</div><div>Estado</div><div></div>
+    <div style="min-width:1080px">
+      <div style="display:grid;grid-template-columns:20px 44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 130px;gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+        <div><input type="checkbox" data-select-all title="Seleccionar todos los de la lista" style="margin:0;cursor:pointer"></div><div></div><div>Juego</div><div>Plat.</div><div>Género</div><div style="text-align:right">Primaria</div><div style="text-align:right">Secundaria</div><div style="text-align:right">Antes</div><div>Estado</div><div></div>
       </div>
       {% for g in rows %}
-        <div style="display:grid;grid-template-columns:44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 60px;gap:12px;padding:10px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px;opacity:{% if g.active %}1{% else %}.55{% endif %}">
+        <div style="display:grid;grid-template-columns:20px 44px minmax(200px,2fr) 70px minmax(110px,1fr) 110px 110px 110px 120px 130px;gap:12px;padding:10px 16px;align-items:center;border-top:1px solid #EFE8DD;font-size:14px;opacity:{% if g.active %}1{% else %}.55{% endif %}">
+          <div><input type="checkbox" name="ids" value="{{ g.pk }}" form="bulk-form" data-row-check style="margin:0;cursor:pointer"></div>
           <div style="width:36px;aspect-ratio:3/4;border-radius:3px;{{ g.cover_bg }}"></div>
-          <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.title }}</div>
+          <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ g.title }}">{% if g.featured %}<span title="Destacado" style="color:#FC8B01">★ </span>{% endif %}{{ g.title }}</div>
           <div style="font-size:12px;font-weight:800">{{ g.plat }}</div>
           <div style="font-size:13px;color:#4A5A78">{{ g.genre }}</div>
           <div style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ g.prim }}</div>
@@ -34,12 +48,28 @@
               <span style="width:34px;height:20px;border-radius:999px;background:{% if g.active %}#011E4F{% else %}#CFC6B8{% endif %};position:relative;flex-shrink:0"><span style="position:absolute;top:2px;left:{% if g.active %}16px{% else %}2px{% endif %};width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s"></span></span>{% if g.active %}Activo{% else %}Oculto{% endif %}
             </button>
           </form>
-          <a href="{{ g.edit_url }}" style="font-size:13px;font-weight:700;text-align:right">Editar</a>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px">
+            <a href="{{ g.edit_url }}" style="font-size:13px;font-weight:700">Editar</a>
+            <form method="post" action="{% url 'gsadmin:dashboard_juego_delete' g.pk %}" data-confirm="¿Eliminar «{{ g.title }}»? Esta acción no se puede deshacer." style="margin:0">{% csrf_token %}
+              <button type="submit" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13px;font-weight:700;color:#C93000">Eliminar</button>
+            </form>
+          </div>
         </div>
       {% empty %}
         <div style="padding:28px 16px;border-top:1px solid #EFE8DD;font-size:14px;color:#4A5A78;text-align:center">No hay juegos con esos filtros.</div>
       {% endfor %}
     </div>
   </div>
+  {% if total %}
+    <form method="post" action="{% url 'gsadmin:dashboard_catalog_delete_all' %}" data-confirm="Se van a borrar los {{ total }} juegos del catálogo con sus carátulas. Los pedidos existentes se conservan. ¿Continuar?" style="margin:0;background:#FFF8F4;border:1px solid #F3C9B8;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:10px">
+      {% csrf_token %}
+      <div style="font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase;color:#9A2A00">Zona de peligro · Eliminar todo el catálogo</div>
+      <div style="font-size:13px;color:#4A5A78">Borra los {{ total }} juegos, sus carátulas, videos del hero y listas de deseos. Los pedidos ya hechos se conservan. No se puede deshacer. Para confirmar escribe <strong>{{ delete_confirm }}</strong>.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <input name="confirm" autocomplete="off" placeholder="{{ delete_confirm }}" style="flex:1 1 200px;max-width:280px;height:40px;padding:0 12px;border:1px solid #F3C9B8;border-radius:4px;background:#fff;font-size:14px">
+        <button type="submit" style="height:40px;padding:0 16px;border:0;border-radius:4px;background:#C93000;color:#fff;font-size:13px;font-weight:800;text-transform:uppercase;cursor:pointer">Eliminar todo el catálogo</button>
+      </div>
+    </form>
+  {% endif %}
 </div>
 {% endblock %}
