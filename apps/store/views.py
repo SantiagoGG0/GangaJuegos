@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from apps.catalog import snapshot
 from apps.catalog.models import Juego
-from apps.catalog.presentation import GIFT_ARTS, shape_game
+from apps.catalog.presentation import GIFT_ARTS, mask_handle, shape_game
 from apps.catalog.pricing import money
 
 from . import constants as C
@@ -124,6 +124,7 @@ def home(request):
             genre_tiles.append({'label': gn, 'count': f'{n} juegos', 'color': C.GENRE_COLORS[len(genre_tiles) % 4]})
 
     testimonials = [{'name': t.name, 'text': t.text} for t in Testimonial.objects.filter(active=True)] or C.REVIEWS_FALLBACK
+    testimonials = [{'handle': mask_handle(t['name']), 'text': t['text']} for t in testimonials]
     settings_row = SiteSettings.load()
 
     ctx = {

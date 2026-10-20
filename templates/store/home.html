@@ -192,7 +192,7 @@
         {% for i in "12" %}{% for r in reviews %}<div style="flex-shrink:0;width:300px;margin-right:12px;padding:18px;border-radius:8px;background:#0A2B66;display:flex;flex-direction:column;gap:10px;white-space:normal">
             <div style="color:#FCC602;letter-spacing:2px;font-size:14px">★★★★★</div>
             <div style="font-size:14px;line-height:21px;color:#E6ECF7;flex:1">“{{ r.text }}”</div>
-            <div style="font-size:12px;font-weight:700;color:#FC8B01">@{{ r.name|cut:"@" }}</div>
+            <div style="font-size:12px;font-weight:700;color:#FC8B01">@{{ r.handle }}</div>
           </div>{% endfor %}{% endfor %}
       </div>
     </div>

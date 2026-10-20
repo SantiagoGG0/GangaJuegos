@@ -93,3 +93,31 @@ class CatalogPerformanceTests(TestCase):
         resp = self.client.get(reverse('store:catalog_data'), HTTP_ACCEPT_ENCODING='gzip, br')
         self.assertEqual(resp['Content-Encoding'], 'gzip')
         self.assertEqual(len(json.loads(gz.decompress(resp.content))), 120)
+
+
+class ReviewPrivacyTests(TestCase):
+    def test_mask_handle(self):
+        from apps.catalog.presentation import mask_handle
+        self.assertEqual(mask_handle('diego.cst.11'), 'die•••')
+        self.assertEqual(mask_handle('@luisalejandroriverachavez'), 'lui•••')
+        self.assertEqual(mask_handle('ana'), 'a•••')
+        self.assertEqual(mask_handle(''), 'cliente')
+
+    @override_settings(STORAGES=PLAIN_STORAGES, SECURE_SSL_REDIRECT=False)
+    def test_home_never_shows_full_handle(self):
+        from apps.catalog.models import Testimonial
+        Testimonial.objects.create(name='melissa_alvarez_2', text='Muy confiables.')
+        html = self.client.get(reverse('store:home')).content.decode()
+        self.assertIn('@mel•••', html)
+        self.assertNotIn('melissa_alvarez_2', html)
+
+    def test_migration_rewrites_only_untouched_reviews(self):
+        import importlib
+        from django.apps import apps as django_apps
+        from apps.catalog.models import Testimonial
+        mig = importlib.import_module('apps.catalog.migrations.0016_resenas_parafraseadas')
+        Testimonial.objects.create(name='davismendoza78', text=mig.REWRITES['davismendoza78'][0][0])
+        Testimonial.objects.create(name='yeixon.blanco', text='Texto editado a mano en el admin.')
+        mig.forwards(django_apps, None)
+        self.assertEqual(Testimonial.objects.get(name='davismendoza78').text, mig.REWRITES['davismendoza78'][1])
+        self.assertEqual(Testimonial.objects.get(name='yeixon.blanco').text, 'Texto editado a mano en el admin.')

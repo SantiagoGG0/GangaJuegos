@@ -89,3 +89,12 @@ def shape_game(juego, mode='Primaria', currency='COP'):
 
 def shape_queryset(qs, mode='Primaria', currency='COP'):
     return [shape_game(g, mode, currency) for g in qs]
+
+
+def mask_handle(name):
+    """Usuario de una reseña para mostrar en público: solo las primeras letras
+    ("diego.cst.11" -> "die•••"), para proteger la privacidad del cliente."""
+    handle = (name or '').strip().lstrip('@')
+    if not handle:
+        return 'cliente'
+    return handle[:3 if len(handle) > 4 else 1] + '•••'

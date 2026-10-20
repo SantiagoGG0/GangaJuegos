@@ -9,6 +9,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
 
+from apps.store.constants import REVIEWS_FALLBACK
+
 from apps.catalog.models import (
     Combo,
     Cupon,
@@ -88,14 +90,7 @@ FEATURED_TAGLINES = {
     "Ghost of Yōtei": "Hokkaido, venganza y una espada. Lo nuevo de PS5.",
 }
 
-TESTIMONIALS = [
-    {"name": "diego.cst.11", "text": "Vuelvo a dejar otro comentario por aquí, es la segunda vez que compro un juego con ellos, la verdad no sé cómo le hacen para tener los precios tan bajos pero en realidad se agradece, gracias chicos, todo bien como siempre."},
-    {"name": "carmelo_j96", "text": "Compré Dragon Ball Z Kakarot por recomendación de un amigo, me funciona 10/10, atención al cliente excelente, recomendado 100%."},
-    {"name": "melissa_alvarez_2", "text": "100% confiable, mi novio compró un juego y tardó más en pagarlo que en tenerlo en la consola. No busquen más, es la mejor opción para comprar los mejores juegos para la play."},
-    {"name": "davismendoza78", "text": "Muy confiables, compré 3 Call of Duty a un muy buen precio, super recomendado."},
-    {"name": "luisalejandroriverachavez", "text": "Yo acabo de comprar The Last of Us Parte 2 sin ningún problema, súper eficientes y eficaces."},
-    {"name": "yeixon.blanco", "text": "100% confiable y recomendable, acabo de comprar el FC 26 y ya lo estoy descargando."},
-]
+TESTIMONIALS = [{"name": t["name"], "text": t["text"]} for t in REVIEWS_FALLBACK]
 
 COUPONS = [
     {"code": "BIENVENIDO10", "tipo": "porcentaje", "valor": "10", "usos_actuales": 184, "usos_max": 500, "vence": date(2027, 12, 31)},

@@ -68,12 +68,12 @@ HELP_ISSUES = [
 ]
 
 REVIEWS_FALLBACK = [
-    {'name': 'diego.cst.11', 'text': 'Vuelvo a dejar otro comentario por aquí, es la segunda vez que compro un juego con ellos, la verdad no sé cómo le hacen para tener los precios tan bajos pero en realidad se agradece.'},
-    {'name': 'carmelo_j96', 'text': 'Compré Dragon Ball Z Kakarot por recomendación de un amigo, me funciona 10/10, atención al cliente excelente, recomendado 100%.'},
-    {'name': 'melissa_alvarez_2', 'text': '100% confiable, mi novio compró un juego y tardó más en pagarlo que en tenerlo en la consola.'},
-    {'name': 'davismendoza78', 'text': 'Muy confiables, compré 3 Call of Duty a un muy buen precio, super recomendado.'},
-    {'name': 'luisalejandroriverachavez', 'text': 'Yo acabo de comprar The Last of Us Parte 2 sin ningún problema, súper eficientes y eficaces.'},
-    {'name': 'yeixon.blanco', 'text': '100% confiable y recomendable, acabo de comprar el FC 26 y ya lo estoy descargando.'},
+    {'name': 'diego.cst.11', 'text': 'Paso de nuevo a comentar: ya es la segunda vez que les compro un juego. Sigo sin entender cómo consiguen precios tan bajos, pero se agradece mucho. Gracias, todo bien otra vez.'},
+    {'name': 'carmelo_j96', 'text': 'Un amigo me los recomendó y compré Dragon Ball Z Kakarot. Funciona perfecto y la atención fue excelente; los recomiendo sin dudarlo.'},
+    {'name': 'melissa_alvarez_2', 'text': 'Totalmente confiables: mi novio compró un juego y lo tuvo en la consola en menos tiempo del que le tomó pagarlo. Si buscan dónde comprar juegos para la Play, esta es la mejor opción.'},
+    {'name': 'davismendoza78', 'text': 'Les compré tres Call of Duty a muy buen precio. Son muy confiables, los recomiendo mucho.'},
+    {'name': 'luisalejandroriverachavez', 'text': 'Acabo de comprar The Last of Us Parte II y todo salió sin ningún problema. Muy rápidos y eficientes.'},
+    {'name': 'yeixon.blanco', 'text': 'Confiables y muy recomendados: compré el FC 26 y ya lo tengo descargando.'},
 ]
 
 LEGAL_UPDATED = '14 de octubre de 2026'
