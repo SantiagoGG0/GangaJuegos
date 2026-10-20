@@ -257,6 +257,17 @@
   function marquee(el) {
     if (RM || !once(el, 'mq')) return;
     requestAnimationFrame(function () {
+      // La plantilla pinta el contenido 2 veces y la animación recorre el 50%.
+      // Si una copia es más angosta que la pantalla, al final queda un hueco:
+      // se repite la copia hasta que cada mitad cubra la pantalla más ancha posible.
+      var kids = [].slice.call(el.children), unit = kids.slice(0, kids.length / 2);
+      var unitW = unit.reduce(function (s, k) { var cs = getComputedStyle(k); return s + k.getBoundingClientRect().width + (parseFloat(cs.marginLeft) || 0) + (parseFloat(cs.marginRight) || 0); }, 0);
+      var need = Math.max(el.parentElement.clientWidth, window.screen ? screen.width : 0, window.innerWidth);
+      if (kids.length % 2 === 0 && unitW > 0 && unitW < need) {
+        var perHalf = Math.ceil(need / unitW), frag = document.createDocumentFragment();
+        for (var c = 0; c < (perHalf - 1) * 2; c++) unit.forEach(function (k) { var n = k.cloneNode(true); n.setAttribute('aria-hidden', 'true'); frag.appendChild(n); });
+        el.appendChild(frag);
+      }
       var a = el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-50%)' }], { duration: Math.max(12000, el.scrollWidth * 22), iterations: Infinity });
       var z = el.parentElement;
       z.addEventListener('pointerenter', function () { a.updatePlaybackRate ? a.updatePlaybackRate(0.25) : (a.playbackRate = 0.25); });
