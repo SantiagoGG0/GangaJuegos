@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}Gift cards PSN · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Gift cards" data-gifts="1" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+<main data-page="1" data-screen-label="Gift cards" data-gifts="1" style="max-width:var(--maxW);margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
   {% include "partials/page_head.html" with kicker="Saldo PSN" title="Gift cards" lead="Códigos digitales para cuentas PSN de Estados Unidos. Te llegan en minutos por WhatsApp o correo." %}
   <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
     {% for g in gifts %}

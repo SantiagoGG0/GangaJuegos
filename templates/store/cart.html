@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Tu carrito · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Carrito" style="max-width:1200px;margin:0 auto;padding:0 var(--pad) 48px;width:100%">
+<main data-page="1" data-screen-label="Carrito" style="max-width:var(--maxW);margin:0 auto;padding:0 var(--pad) 48px;width:100%">
   <div style="display:flex;align-items:baseline;gap:12px;padding:var(--cartTop) 0 20px">
     <h1 style="margin:0;font:italic 900 var(--detailH1)/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase">Tu carrito</h1>
     <span style="font-size:14px;font-weight:600;color:#A9B8D6">{{ item_count }} productos</span>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}PS Plus · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="PS Plus" data-plus="1" data-tier="{{ sel_tier }}" data-months="{{ sel_months }}" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+<main data-page="1" data-screen-label="PS Plus" data-plus="1" data-tier="{{ sel_tier }}" data-months="{{ sel_months }}" style="max-width:var(--maxW);margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
   {% include "partials/page_head.html" with kicker="Suscripción" title="PS Plus" lead="Elige el plan y la duración. Te enviamos tu suscripción en minutos." %}
   {% if platforms %}
   <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">

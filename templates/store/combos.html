@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Combos · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Combos" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+<main data-page="1" data-screen-label="Combos" style="max-width:var(--maxW);margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
   {% include "partials/page_head.html" with kicker="Ahorra más" title="Combos" lead="Dos o tres juegos en una sola compra, en cuenta primaria y con garantía de un año." %}
   <div data-reveal-stagger="1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
     {% for c in combos %}

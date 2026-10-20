@@ -2,7 +2,7 @@
 {% block title %}{{ game.title }} · {{ game.plat }} · Ganga Juegos{% endblock %}
 {% block description %}{{ game.title }} para {{ game.plat }}: cuenta primaria {{ game.prim }} o secundaria {{ game.sec }}. Entrega en minutos y garantía de 1 año.{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Detalle" data-detail="1" data-id="{{ game.pk }}" style="max-width:1200px;margin:0 auto;padding:0 var(--pad);width:100%">
+<main data-page="1" data-screen-label="Detalle" data-detail="1" data-id="{{ game.pk }}" style="max-width:var(--maxW);margin:0 auto;padding:0 var(--pad);width:100%">
   <form method="post" action="{% url 'orders:cart_add' %}" data-add-form="1" hidden>{% csrf_token %}<input type="hidden" name="type" value="juego"><input type="hidden" name="id" value="{{ game.pk }}"><input type="hidden" name="acc" value="primaria" data-acc-input="1"><input type="hidden" name="next" value=""></form>
   <div style="padding:16px 0;font-size:13px;color:#A9B8D6;display:flex;gap:8px;min-width:0"><a href="{% url 'store:catalog' %}" style="flex-shrink:0">Catálogo</a><span>/</span><span style="color:#FCF8F3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ game.title }}</span></div>
   <div style="display:flex;gap:48px;align-items:flex-start;padding-bottom:40px">
@@ -74,7 +74,7 @@
   {% if related %}
   <section style="display:flex;flex-direction:column;gap:16px;padding-bottom:40px">
     <h2 style="margin:0;font:italic 900 22px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">También te puede gustar</h2>
-    <div data-reveal-stagger="1" class="gj-noscroll" style="display:grid;grid-auto-flow:column;grid-auto-columns:var(--railCol);gap:12px;overflow-x:auto;margin:0 calc(-1 * var(--pad));padding:4px var(--pad) 12px;scrollbar-width:none">
+    <div data-reveal-stagger="1" class="gj-noscroll" style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(var(--railCol),1fr);gap:12px;overflow-x:auto;margin:0 calc(-1 * var(--pad));padding:4px var(--pad) 12px;scrollbar-width:none">
       {% for g in related %}
         <a href="{{ g.url }}" class="hv-ring" data-tilt="10" style="cursor:pointer;display:flex;flex-direction:column;min-width:0;background:#FCF8F3;border-radius:8px;overflow:hidden;color:#011E4F;transition:transform .2s">
           <div style="position:relative;aspect-ratio:3/4;{{ g.cover_bg }}">

@@ -5,7 +5,7 @@
 
 <header data-scroll-header="1" style="position:sticky;top:0;z-index:30;background:rgba(1,30,79,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(252,248,243,.1);transition:box-shadow .3s">
   <div data-scroll-progress="1" style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,#FC3C00,#FC8B01,#FCC602);transform-origin:0 50%;transform:scaleX(0);pointer-events:none;z-index:2"></div>
-  <div style="max-width:1200px;margin:0 auto;height:var(--headerH);padding:0 var(--pad);display:flex;align-items:center;gap:12px">
+  <div style="max-width:var(--maxW);margin:0 auto;height:var(--headerH);padding:0 var(--pad);display:flex;align-items:center;gap:12px">
     <button type="button" class="gj-m" data-toggle="menu" aria-label="Menú" aria-expanded="false" style="width:40px;height:40px;margin-left:-8px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding-left:10px">
       <span style="width:20px;height:2px;background:#FCF8F3"></span>
       <span style="width:14px;height:2px;background:#FC8B01"></span>
@@ -45,7 +45,7 @@
   </div>
 
   <div class="gj-d" data-mega-panel="catalog" data-enter="drop" hidden style="position:absolute;left:0;right:0;top:100%;background:#011E4F;border-top:1px solid rgba(252,248,243,.08);border-bottom:1px solid rgba(252,248,243,.12);box-shadow:0 30px 60px -20px rgba(0,0,0,.65)">
-    <div style="max-width:1200px;margin:0 auto;padding:24px var(--pad) 28px;display:grid;grid-template-columns:200px minmax(0,1fr) 300px;gap:32px">
+    <div style="max-width:var(--maxW);margin:0 auto;padding:24px var(--pad) 28px;display:grid;grid-template-columns:200px minmax(0,1fr) 300px;gap:32px">
       <div style="display:flex;flex-direction:column;gap:8px">
         <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">Plataforma</div>
         {% for p in mega_plats %}
@@ -71,7 +71,7 @@
   </div>
 
   <div class="gj-d" data-mega-panel="deals" data-enter="drop" hidden style="position:absolute;left:0;right:0;top:100%;background:#011E4F;border-top:1px solid rgba(252,248,243,.08);border-bottom:1px solid rgba(252,248,243,.12);box-shadow:0 30px 60px -20px rgba(0,0,0,.65)">
-    <div style="max-width:1200px;margin:0 auto;padding:24px var(--pad) 28px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px">
+    <div style="max-width:var(--maxW);margin:0 auto;padding:24px var(--pad) 28px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px">
       <div style="display:flex;flex-direction:column;gap:2px">
         <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A9B8D6">Ofertas</div>
         {% for d in deal_links %}

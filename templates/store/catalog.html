@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ catalog_title }} · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Catálogo" data-catalog="1" data-src="{{ data_url }}" data-batch="{{ catalog_page }}" data-plat="{{ f_plat }}" data-genre="{{ f_genre }}" data-sort="{{ f_sort }}" data-deals="{% if f_deals %}1{% endif %}" style="max-width:1200px;margin:0 auto;padding:0 var(--pad);width:100%">
+<main data-page="1" data-screen-label="Catálogo" data-catalog="1" data-src="{{ data_url }}" data-batch="{{ catalog_page }}" data-plat="{{ f_plat }}" data-genre="{{ f_genre }}" data-sort="{{ f_sort }}" data-deals="{% if f_deals %}1{% endif %}" style="max-width:var(--maxW);margin:0 auto;padding:0 var(--pad);width:100%">
   <div class="gj-m" data-deals-banner="1" {% if not f_deals %}hidden{% endif %} style="margin:0 -16px;padding:12px 16px;background:linear-gradient(90deg,#FC3C00,#FC5F01 35%,#FC8B01 70%,#FCC602);color:#011E4F;display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font:italic 900 22px/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Ofertas</span><span style="font-size:13px;font-weight:700"><span data-result-count="1">{{ result_count }}</span> juegos con descuento</span></div>
   <div class="gj-d" style="display:flex;align-items:baseline;gap:16px;padding:40px 0 24px">
     <h1 data-catalog-title="1" style="margin:0;font:italic 900 48px/1 'Archivo',sans-serif;font-stretch:115%;text-transform:uppercase">{{ catalog_title }}</h1>

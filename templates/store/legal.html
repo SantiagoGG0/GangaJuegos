@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ legal_title }} · Ganga Juegos{% endblock %}
 {% block content %}
-<main data-page="1" data-screen-label="Legales" style="max-width:1200px;margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
+<main data-page="1" data-screen-label="Legales" style="max-width:var(--maxW);margin:0 auto;padding:var(--cartTop) var(--pad) 48px;display:flex;flex-direction:column;gap:24px;width:100%">
   <div style="display:flex;gap:2px;padding:3px;background:#0A2B66;border-radius:4px;align-self:flex-start">
     <a href="{% url 'store:terms' %}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'terminos' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'terminos' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Términos</a>
     <a href="{% url 'store:privacy' %}" style="border:0;cursor:pointer;height:40px;padding:0 16px;border-radius:2px;font-weight:700;font-size:14px;background:{% if tab == 'privacidad' %}#FCF8F3{% else %}transparent{% endif %};color:{% if tab == 'privacidad' %}#011E4F{% else %}#C9D4E8{% endif %};white-space:nowrap;display:flex;align-items:center">Privacidad</a>
