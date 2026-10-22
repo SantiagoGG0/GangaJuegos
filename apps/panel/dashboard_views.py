@@ -244,7 +244,8 @@ BULK_ACTIONS = {
 
 @require_POST
 def catalog_bulk(request):
-    ids = [int(i) for i in request.POST.getlist('ids') if i.isdigit()]
+    raw = request.POST.getlist('ids') + request.POST.get('ids_csv', '').split(',')
+    ids = [int(i) for i in raw if i.strip().isdigit()]
     action = request.POST.get('action', '')
     qs = Juego.objects.filter(pk__in=ids)
     count = qs.count()

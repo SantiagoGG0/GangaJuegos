@@ -304,3 +304,29 @@ class ContactSettingsTests(TestCase):
         self._post(whatsapp_button_number='573005550000')
         html = self.client.get('/', secure=True).content.decode()
         self.assertIn('wa.me/573005550000', html)
+
+
+@override_settings(STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class CatalogBulkLargeTests(TestCase):
+    """Con "seleccionar todos" en un catálogo grande se superaba el límite de
+    1000 campos de Django (400 Bad Request)."""
+
+    def setUp(self):
+        self.client.force_login(get_user_model().objects.create_superuser('a@a.co', 'x', nombre='Admin'))
+        Juego.objects.bulk_create([Juego(title=f'J{i}', slug=f'j-{i}', platform='PS5', genre='RPG',
+                                         price_primary=2000, price_secondary=1000) for i in range(1500)])
+        self.ids = ','.join(str(pk) for pk in Juego.objects.values_list('pk', flat=True))
+        self.url = reverse('gsadmin:dashboard_catalog_bulk')
+
+    def test_one_field_per_game_is_rejected_by_django(self):
+        resp = self.client.post(self.url, {'action': 'ocultar', 'ids': self.ids.split(',')})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_ids_in_single_field_work_for_1500_games(self):
+        self.client.post(self.url, {'action': 'ocultar', 'ids_csv': self.ids})
+        self.assertEqual(Juego.objects.filter(active=False).count(), 1500)
+        self.client.post(self.url, {'action': 'eliminar', 'ids_csv': self.ids})
+        self.assertEqual(Juego.objects.count(), 0)

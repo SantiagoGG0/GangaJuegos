@@ -86,8 +86,15 @@
     bulk.addEventListener('submit', function (e) {
       var action = bulk.elements.action.value, n = $('[data-bulk-count]', bulk).textContent;
       if (!action) { e.preventDefault(); window.alert('Elige una acción.'); return; }
-      if (action === 'eliminar' && !window.confirm('¿Eliminar ' + n + ' juego(s)? Esta acción no se puede deshacer.')) e.preventDefault();
+      if (action === 'eliminar' && !window.confirm('¿Eliminar ' + n + ' juego(s)? Esta acción no se puede deshacer.')) { e.preventDefault(); return; }
+      // Una casilla = un campo del formulario, y Django rechaza (400) más de 1000
+      // campos: con "seleccionar todos" en un catálogo grande se superaba. Se
+      // envían todos los ids en un solo campo y las casillas no se envían.
+      bulk.elements.ids_csv.value = checks.filter(function (c) { return c.checked; }).map(function (c) { return c.value; }).join(',');
+      checks.forEach(function (c) { c.disabled = true; });
     });
+    // al volver con "atrás" el navegador puede restaurar la página con las casillas deshabilitadas
+    window.addEventListener('pageshow', function () { checks.forEach(function (c) { c.disabled = false; }); refresh(); });
     refresh();
   }
 
