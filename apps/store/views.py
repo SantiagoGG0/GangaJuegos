@@ -23,9 +23,21 @@ def _json(data):
 
 @require_POST
 def set_currency(request):
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    from .context_processors import _countries
+    from .middleware import COUNTRY_COOKIE, COUNTRY_COOKIE_AGE
+
     code = request.POST.get('currency', 'COP')
+    if code not in {c['code'] for c in _countries(code)}:
+        code = 'COP'
     request.session['currency'] = code
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    target = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+    if not url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        target = '/'
+    response = redirect(target)
+    response.set_cookie(COUNTRY_COOKIE, code, max_age=COUNTRY_COOKIE_AGE, samesite='Lax', secure=request.is_secure())
+    return response
 
 
 @require_POST

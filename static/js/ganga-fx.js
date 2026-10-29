@@ -482,5 +482,5 @@
   if (document.body) scan(document.body, false);
   document.addEventListener('DOMContentLoaded', function () { scan(document.body, false); });
 
-  window.GangaFX = { intro: function (f) { intro(f !== false); }, burst: burst, refresh: function () { scan(document.body, false); } };
+  window.GangaFX = { intro: function (f) { intro(f !== false); }, introDelay: introDelay, burst: burst, refresh: function () { scan(document.body, false); } };
 })();

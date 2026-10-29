@@ -137,6 +137,8 @@ def global_context(request):
 
     base.update({
         'currencies': countries,
+        # primera visita: todavía no eligió país (ni en la sesión ni en la cookie)
+        'ask_country': 'currency' not in request.session and bool(countries),
         'cur': current,
         'current_currency': current_code,
         'country_count': len(countries),

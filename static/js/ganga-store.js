@@ -281,6 +281,38 @@
     }
   })();
 
+  /* ------------------------------------------ primera visita: elegir país */
+  (function () {
+    var box = $('[data-country-picker]'); if (!box) return;
+    try { if (sessionStorage.getItem('gj-country-later')) return; } catch (e) {}
+    // País sugerido por la zona horaria del dispositivo (sin pedir ubicación).
+    var TZ = {
+      COP: /^America\/Bogota$/, VES: /^America\/Caracas$/, USDEC: /^(America\/Guayaquil|Pacific\/Galapagos)$/,
+      ARS: /^America\/(Argentina\/|Buenos_Aires|Cordoba|Mendoza)/, PEN: /^America\/Lima$/,
+      MXN: /^America\/(Mexico_City|Monterrey|Cancun|Merida|Tijuana|Chihuahua|Hermosillo|Mazatlan|Matamoros|Bahia_Banderas|Ojinaga|Ciudad_Juarez)$/,
+      CLP: /^(America\/(Santiago|Punta_Arenas)|Pacific\/Easter)$/, PYG: /^America\/Asuncion$/,
+      USD: /^(America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Indiana\/|Kentucky\/|North_Dakota\/)|Pacific\/Honolulu)/
+    };
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var guess = Object.keys(TZ).filter(function (k) { return TZ[k].test(tz); })[0];
+    var item = guess && $('[data-country="' + guess + '"]', box);
+    if (item) {
+      var list = $('[data-country-list]', box), btn = $('button', item);
+      list.insertBefore(item, list.firstChild);
+      css(btn, { borderColor: '#FC8B01', boxShadow: '0 0 0 2px #FC8B01 inset', background: '#FFF6E8' });
+      var sub = $('[data-country-sub]', item); sub.textContent = sub.textContent + ' · sugerido'; sub.style.color = '#C93000';
+    }
+    function close() { hide(box); document.documentElement.style.overflow = ''; try { sessionStorage.setItem('gj-country-later', '1'); } catch (e) {} }
+    $('[data-country-later]', box).addEventListener('click', close);
+    box.addEventListener('click', function (e) { if (e.target === box) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) close(); });
+    var wait = (window.GangaFX && GangaFX.introDelay ? GangaFX.introDelay() : 0) + 350;
+    setTimeout(function () {
+      show(box); document.documentElement.style.overflow = 'hidden';
+      var first = $('[data-country] button', box); if (first) first.focus({ preventScroll: true });
+    }, wait);
+  })();
+
   /* ---------------------------------------------------- agregar al carrito */
   function bumpCart(n) {
     $$('[data-cart-count]').forEach(function (el) { el.textContent = n; el.setAttribute('data-pop', n); });

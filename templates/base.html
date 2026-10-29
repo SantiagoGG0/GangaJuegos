@@ -39,6 +39,7 @@
 
   {% include "partials/footer.html" %}
   {% include "partials/overlays.html" %}
+  {% if ask_country %}{% include "partials/country_picker.html" %}{% endif %}
 </div>
 <script src="{% static 'js/ganga-fx.js' %}"></script>
 <script src="{% static 'js/ganga-store.js' %}"></script>

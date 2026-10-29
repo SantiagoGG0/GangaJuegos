@@ -27,3 +27,24 @@ class VisitTrackingMiddleware:
                 except Exception:  # noqa: BLE001 — nunca debe romper la respuesta real
                     pass
         return response
+
+
+COUNTRY_COOKIE = 'gj_pais'
+COUNTRY_COOKIE_AGE = 365 * 24 * 3600
+
+
+class CountryCookieMiddleware:
+    """El país/moneda elegido se guarda en la sesión y, además, en una cookie
+    de un año: si la sesión vence, el visitante no tiene que volver a elegir.
+    Aquí se copia de la cookie a la sesión cuando la sesión no lo tiene."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        code = request.COOKIES.get(COUNTRY_COOKIE)
+        if code and 'currency' not in request.session and not request.path.startswith(('/admin', '/static/', '/media/')):
+            from .context_processors import _countries
+            if code in {c['code'] for c in _countries(code)}:
+                request.session['currency'] = code
+        return self.get_response(request)

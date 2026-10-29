@@ -121,3 +121,45 @@ class ReviewPrivacyTests(TestCase):
         mig.forwards(django_apps, None)
         self.assertEqual(Testimonial.objects.get(name='davismendoza78').text, mig.REWRITES['davismendoza78'][1])
         self.assertEqual(Testimonial.objects.get(name='yeixon.blanco').text, 'Texto editado a mano en el admin.')
+
+
+@override_settings(STORAGES=PLAIN_STORAGES, SECURE_SSL_REDIRECT=False)
+class CountryPickerTests(TestCase):
+    def setUp(self):
+        from apps.catalog.models import Divisa
+        snapshot.bump()
+        for code, pais in (('COP', 'Colombia'), ('MXN', 'México'), ('USD', 'Estados Unidos')):
+            Divisa.objects.create(codigo=code, tasa=1, pais=pais, bandera='')
+
+    def test_first_visit_asks_for_country(self):
+        resp = self.client.get(reverse('store:home'))
+        self.assertTrue(resp.context['ask_country'])
+        self.assertContains(resp, 'data-country-picker')
+        self.assertContains(resp, 'data-country="MXN"')
+
+    def test_choosing_country_sets_currency_and_cookie(self):
+        resp = self.client.post(reverse('store:set_currency'), {'currency': 'MXN', 'next': '/catalogo/?platform=PS5'})
+        self.assertRedirects(resp, '/catalogo/?platform=PS5', fetch_redirect_response=False)
+        self.assertEqual(resp.cookies['gj_pais'].value, 'MXN')
+        self.assertGreater(int(resp.cookies['gj_pais']['max-age']), 300 * 24 * 3600)
+        page = self.client.get(reverse('store:home'))
+        self.assertFalse(page.context['ask_country'])
+        self.assertNotContains(page, 'data-country-picker')
+        self.assertEqual(page.context['current_currency'], 'MXN')
+
+    def test_cookie_restores_country_when_session_is_new(self):
+        self.client.cookies['gj_pais'] = 'USD'
+        page = self.client.get(reverse('store:home'))
+        self.assertFalse(page.context['ask_country'])
+        self.assertEqual(page.context['current_currency'], 'USD')
+
+    def test_invalid_currency_and_external_redirect_are_ignored(self):
+        resp = self.client.post(reverse('store:set_currency'), {'currency': 'XXX', 'next': 'https://evil.example/'})
+        self.assertEqual(resp['Location'], '/')
+        self.assertEqual(resp.cookies['gj_pais'].value, 'COP')
+        from django.test import Client
+        other = Client()
+        other.cookies['gj_pais'] = 'XXX'  # cookie manipulada: se ignora y se vuelve a preguntar
+        page = other.get(reverse('store:home'))
+        self.assertTrue(page.context['ask_country'])
+        self.assertEqual(page.context['current_currency'], 'COP')
