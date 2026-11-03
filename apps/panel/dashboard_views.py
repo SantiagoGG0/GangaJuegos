@@ -4,6 +4,7 @@ datos reales de la base. Cada pestaña es una vista protegida por el
 AdminSite (`admin_view`)."""
 import csv
 import datetime
+import re
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -34,6 +35,7 @@ TABS = [
     ('divisas', 'Divisas', 'gsadmin:dashboard_divisas', 'Monedas'),
     ('caratulas', 'Carátulas', 'gsadmin:covers_manager', 'Imágenes'),
     ('carga', 'Carga masiva', 'gsadmin:products_bulk', 'Importar'),
+    ('plus', 'PS Plus', 'gsadmin:dashboard_plus', 'Suscripciones'),
     ('contacto', 'Contacto', 'gsadmin:dashboard_contacto', 'WhatsApp y redes'),
 ]
 
@@ -641,3 +643,71 @@ def tab_contacto(request):
                   for n, lb, ph, h in CONTACT_TEXT_FIELDS],
     })
     return render(request, 'panel/contacto.html', ctx)
+
+
+# --------------------------------------------------------------- PS Plus
+
+def _plus_price(raw):
+    """'76.000', '$ 76000' o '76000' -> 76000; '' -> None; inválido -> False."""
+    digits = re.sub(r'[^\d]', '', raw or '')
+    if not (raw or '').strip():
+        return None
+    return int(digits) if digits and int(digits) > 0 else False
+
+
+def tab_plus(request):
+    """Precios de PS Plus por consola: una tabla plan × duración para PS5 y otra
+    para PS4. Casilla vacía = esa combinación no se vende."""
+    from apps.catalog.models import MONTHS_CHOICES, TIER_CHOICES, PlusPlan
+
+    ctx = base_context(request, 'plus')
+    platforms = [p for p, _ in PlusPlan.PLATFORM_CHOICES]
+    tiers = [t for t, _ in TIER_CHOICES]
+    months = [m for m, _ in MONTHS_CHOICES]
+    existing = {(p.platform, p.tier, p.months): p for p in PlusPlan.objects.all()}
+    values, errors = {}, set()
+    for pl in platforms:
+        for t in tiers:
+            for m in months:
+                plan = existing.get((pl, t, m))
+                values[(pl, t, m)] = f'{plan.price:,}'.replace(',', '.') if plan else ''
+
+    if request.method == 'POST':
+        parsed = {}
+        for key in values:
+            raw = request.POST.get('price_%s_%s_%s' % key, '')
+            values[key] = raw.strip()
+            price = _plus_price(raw)
+            if price is False:
+                errors.add(key)
+            parsed[key] = price
+        if errors:
+            messages.error(request, 'Hay precios no válidos (marcados en rojo). Usa solo números, ej: 76000.')
+        else:
+            created = updated = removed = 0
+            with transaction.atomic():
+                for (pl, t, m), price in parsed.items():
+                    plan = existing.get((pl, t, m))
+                    if price is None:
+                        if plan:
+                            plan.delete()
+                            removed += 1
+                    elif plan is None:
+                        PlusPlan.objects.create(platform=pl, tier=t, months=m, price=price)
+                        created += 1
+                    elif plan.price != price:
+                        plan.price = price
+                        plan.save(update_fields=['price'])
+                        updated += 1
+            messages.success(request, f'Precios de PS Plus guardados ({updated} cambiados, {created} nuevos, {removed} quitados).')
+            return redirect('gsadmin:dashboard_plus')
+
+    ctx.update({
+        'months': [{'m': m, 'label': lb} for m, lb in MONTHS_CHOICES],
+        'tables': [{
+            'platform': pl,
+            'rows': [{'tier': t, 'cells': [{'name': f'price_{pl}_{t}_{m}', 'value': values[(pl, t, m)],
+                                            'error': (pl, t, m) in errors} for m in months]} for t in tiers],
+        } for pl in platforms],
+    })
+    return render(request, 'panel/plus.html', ctx)

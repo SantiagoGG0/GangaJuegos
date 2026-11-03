@@ -330,3 +330,57 @@ class CatalogBulkLargeTests(TestCase):
         self.assertEqual(Juego.objects.filter(active=False).count(), 1500)
         self.client.post(self.url, {'action': 'eliminar', 'ids_csv': self.ids})
         self.assertEqual(Juego.objects.count(), 0)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class PlusPricesPanelTests(TestCase):
+    def setUp(self):
+        from apps.catalog.models import PlusPlan
+        self.client.force_login(get_user_model().objects.create_superuser('a@a.co', 'x', nombre='Admin'))
+        self.url = reverse('gsadmin:dashboard_plus')
+        PlusPlan.objects.create(tier='Extra', platform='PS5', months=12, price=69000)
+        PlusPlan.objects.create(tier='Essential', platform='PS5', months=1, price=9900)
+
+    def _form(self, **over):
+        data = {}
+        for pl in ('PS5', 'PS4'):
+            for t in ('Essential', 'Extra', 'Deluxe'):
+                for m in (1, 3, 12):
+                    data[f'price_{pl}_{t}_{m}'] = ''
+        data.update(over)
+        return data
+
+    def test_migration_copies_ps5_plans_to_ps4(self):
+        import importlib
+        from django.apps import apps as django_apps
+        from apps.catalog.models import PlusPlan
+        mig = importlib.import_module('apps.catalog.migrations.0017_plus_planes_ps4')
+        mig.forwards(django_apps, None)
+        mig.forwards(django_apps, None)  # idempotente
+        self.assertEqual(PlusPlan.objects.get(platform='PS4', tier='Extra', months=12).price, 69000)
+        self.assertEqual(PlusPlan.objects.filter(platform='PS4').count(), 2)
+
+    def test_page_shows_both_consoles_with_prices(self):
+        resp = self.client.get(self.url)
+        self.assertContains(resp, 'PS Plus · PS5')
+        self.assertContains(resp, 'PS Plus · PS4')
+        self.assertContains(resp, 'value="69.000"')
+
+    def test_save_updates_creates_and_removes(self):
+        from apps.catalog.models import PlusPlan
+        resp = self.client.post(self.url, self._form(price_PS5_Extra_12='$ 72.000', price_PS4_Extra_12='65000'))
+        self.assertRedirects(resp, self.url)
+        self.assertEqual(PlusPlan.objects.get(platform='PS5', tier='Extra', months=12).price, 72000)
+        self.assertEqual(PlusPlan.objects.get(platform='PS4', tier='Extra', months=12).price, 65000)
+        self.assertFalse(PlusPlan.objects.filter(platform='PS5', tier='Essential', months=1).exists())
+
+    def test_invalid_price_saves_nothing(self):
+        from apps.catalog.models import PlusPlan
+        resp = self.client.post(self.url, self._form(price_PS5_Extra_12='gratis', price_PS4_Extra_12='65000'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'no válidos')
+        self.assertFalse(PlusPlan.objects.filter(platform='PS4').exists())
+        self.assertEqual(PlusPlan.objects.get(platform='PS5', tier='Extra', months=12).price, 69000)

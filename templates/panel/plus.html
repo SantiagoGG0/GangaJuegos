@@ -1,0 +1,31 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<form method="post" data-screen-label="Panel · PS Plus" style="display:flex;flex-direction:column;gap:16px;margin:0;max-width:900px">
+  {% csrf_token %}
+  <div style="font-size:14px;line-height:21px;color:#4A5A78">Precios en <strong>COP</strong> de cada plan de PS Plus, por consola. En la tienda se convierten a la moneda de cada país. Deja una casilla <strong>vacía</strong> si esa combinación no se vende (desaparece de la tienda).</div>
+  {% for t in tables %}
+    <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;overflow-x:auto">
+      <div style="min-width:560px">
+        <div style="padding:14px 16px;border-bottom:1px solid #E6DED2;font:italic 900 18px/1 'Archivo',sans-serif;text-transform:uppercase">PS Plus · {{ t.platform }}</div>
+        <div style="display:grid;grid-template-columns:140px repeat({{ months|length }},1fr);gap:12px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#4A5A78;background:#FCF8F3">
+          <div>Plan</div>{% for m in months %}<div>{{ m.label }}</div>{% endfor %}
+        </div>
+        {% for r in t.rows %}
+          <div style="display:grid;grid-template-columns:140px repeat({{ months|length }},1fr);gap:12px;padding:10px 16px;align-items:center;border-top:1px solid #EFE8DD">
+            <div style="font-weight:800">{{ r.tier }}</div>
+            {% for c in r.cells %}
+              <label style="display:flex;align-items:center;gap:6px;height:38px;padding:0 10px;border:1px solid {% if c.error %}#C93000{% else %}#E6DED2{% endif %};border-radius:4px;background:#FCF8F3">
+                <span style="font-size:13px;color:#4A5A78">$</span>
+                <input name="{{ c.name }}" value="{{ c.value }}" inputmode="numeric" autocomplete="off" placeholder="No se vende" aria-label="{{ t.platform }} {{ r.tier }}" style="flex:1;min-width:0;height:100%;border:0;background:transparent;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;outline:none">
+              </label>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+  <div>
+    <button type="submit" style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Guardar precios</button>
+  </div>
+</form>
+{% endblock %}

@@ -30,6 +30,7 @@ class GangaJuegosAdminSite(admin.AdminSite):
             path('metricas/', self.admin_view(dv.tab_metricas), name='dashboard_metricas'),
             path('divisas/', self.admin_view(dv.tab_divisas), name='dashboard_divisas'),
             path('contacto/', self.admin_view(dv.tab_contacto), name='dashboard_contacto'),
+            path('plus/', self.admin_view(dv.tab_plus), name='dashboard_plus'),
             path('divisas/guardar/', self.admin_view(dv.save_rates), name='dashboard_save_rates'),
             path('caratulas/', self.admin_view(dv.tab_caratulas), name='covers_manager'),
             path('caratulas/upload/', self.admin_view(covers_views.covers_upload_ajax), name='covers_upload'),
