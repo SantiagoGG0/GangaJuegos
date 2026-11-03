@@ -68,9 +68,10 @@ def cart_lines(cart_items):
                 continue
             label = '1 mes' if plan.months == 1 else f'{plan.months} meses'
             lines.append({
-                'entry': entry, 'kind': kind, 'titulo': f'PS Plus {plan.tier}', 'juego': None,
+                'entry': entry, 'kind': kind, 'titulo': f'PS Plus {plan.tier} · {plan.platform}', 'juego': None,
                 'precio_cop': plan.price, 'cantidad': qty, 'cuenta': '',
-                'sub': f'Suscripción · {label}', 'order_title': f'PlayStation Plus {plan.tier} ({label})',
+                'sub': f'Suscripción {plan.platform} · {label}',
+                'order_title': f'PlayStation Plus {plan.tier} {plan.platform} ({label})',
                 'cover_bg': f'background:{PLUS_ART}', 'url': '/plus/',
             })
         elif kind == 'gift':

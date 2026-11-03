@@ -465,11 +465,15 @@ def _perks(body):
 def plus(request):
     from apps.catalog.models import PlusPlan, TierInfo
 
+    from .whatsapp import wa_link
+
     currency = _currency(request)
-    platforms = sorted(set(PlusPlan.objects.values_list('platform', flat=True)), reverse=True)
+    # PS4 y PS5 tienen precios distintos: el selector se muestra siempre, aunque
+    # una consola todavía no tenga planes cargados (se ofrece cotizar por WhatsApp).
+    platforms = [p for p, _ in PlusPlan.PLATFORM_CHOICES]
     platform = request.GET.get('platform', 'PS5')
     if platform not in platforms:
-        platform = platforms[0] if platforms else 'PS5'
+        platform = 'PS5'
 
     plans = {}
     months_set = set()
@@ -506,7 +510,9 @@ def plus(request):
         'sel_id': sel_plan['id'] if sel_plan else '',
         'plans_json': _json(plans),
         'platform': platform,
-        'platforms': platforms if len(platforms) > 1 else [],
+        'platforms': platforms,
+        'no_plans': not tiers,
+        'quote_link': wa_link(f'Hola, quiero cotizar PS Plus para {platform}.'),
     })
 
 

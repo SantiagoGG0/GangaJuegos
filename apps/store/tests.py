@@ -163,3 +163,39 @@ class CountryPickerTests(TestCase):
         page = other.get(reverse('store:home'))
         self.assertTrue(page.context['ask_country'])
         self.assertEqual(page.context['current_currency'], 'COP')
+
+
+@override_settings(STORAGES=PLAIN_STORAGES, SECURE_SSL_REDIRECT=False)
+class PlusPlatformTests(TestCase):
+    def setUp(self):
+        from apps.catalog.models import PlusPlan, TierInfo
+        snapshot.bump()
+        TierInfo.objects.create(tier='Essential', label='Básico', body='Juego online')
+        self.ps5 = PlusPlan.objects.create(tier='Essential', platform='PS5', months=1, price=9900)
+
+    def test_selector_always_shows_both_consoles(self):
+        resp = self.client.get(reverse('store:plus'))
+        self.assertEqual(resp.context['platforms'], ['PS5', 'PS4'])
+        self.assertContains(resp, '?platform=PS4')
+        self.assertContains(resp, '1 · Tu consola')
+
+    def test_console_without_plans_offers_quote(self):
+        resp = self.client.get(reverse('store:plus'), {'platform': 'PS4'})
+        self.assertTrue(resp.context['no_plans'])
+        self.assertContains(resp, 'Cotizar por WhatsApp')
+        self.assertNotContains(resp, 'data-add-item="plan"')
+
+    def test_each_console_shows_its_own_prices(self):
+        from apps.catalog.models import PlusPlan
+        PlusPlan.objects.create(tier='Essential', platform='PS4', months=1, price=7900)
+        ps4 = self.client.get(reverse('store:plus'), {'platform': 'PS4'})
+        ps5 = self.client.get(reverse('store:plus'), {'platform': 'PS5'})
+        self.assertContains(ps4, '7.900')
+        self.assertNotContains(ps4, '9.900')
+        self.assertContains(ps5, '9.900')
+
+    def test_cart_line_says_which_console(self):
+        from apps.orders.payments import cart_lines
+        line = cart_lines([{'type': 'plan', 'id': self.ps5.pk, 'qty': 1}])[0]
+        self.assertIn('PS5', line['titulo'])
+        self.assertIn('PS5', line['order_title'])

@@ -507,7 +507,7 @@
         css(b, { background: on ? CREAM : 'transparent', color: on ? NAVY : '#C9D4E8' });
       });
       var sel = (plans[tier] || {})[months];
-      $('[data-plus-summary]', root).textContent = 'PS Plus ' + tier + ' · ' + (months === '1' ? '1 mes' : months + ' meses');
+      $('[data-plus-summary]', root).textContent = 'PS Plus ' + tier + ' · ' + (root.getAttribute('data-platform') || '') + ' · ' + (months === '1' ? '1 mes' : months + ' meses');
       var price = $('[data-plus-price]', root);
       price.textContent = sel ? sel.price : '—'; price.setAttribute('data-pop', sel ? sel.price : '');
       if (add) add.setAttribute('data-id', sel ? sel.id : '');
