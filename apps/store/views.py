@@ -89,6 +89,7 @@ def _faq():
 # ---------------------------------------------------------------- home
 
 HOME_RAIL = 12  # juegos del riel de ofertas del home (se repite para el loop)
+HERO_SLIDES = 6  # máximo de diapositivas del hero al sumar destacados a los videos
 
 def home(request):
     from apps.catalog.models import GiftCard, HeroVideo, PlusPlan, SiteSettings, Testimonial
@@ -98,17 +99,19 @@ def home(request):
     shaped = snapshot.shaped_games(currency)
 
     slides = []
+    with_video = set()
     for hv in HeroVideo.objects.filter(active=True, juego__active=True).select_related('juego', 'juego__cover').order_by('order', 'id'):
         g = shaped.get(hv.juego_id)
         if not g:
             continue
+        with_video.add(hv.juego_id)
         slides.append({**_slide(g), 'video': hv.video.url, 'image': hv.poster.url if hv.poster else g['cover_url']})
-    if not slides:
-        feat = [shaped[g.pk] for g in games if g.featured][:3]
-        if len(feat) < 3:
-            extra = [shaped[g.pk] for g in sorted(games, key=lambda g: -g.discount_percent) if not g.featured]
-            feat += extra[:3 - len(feat)]
-        slides = [{**_slide(g), 'video': '', 'image': g['cover_url']} for g in feat]
+    # Los destacados sin video entran después de los videos, con su carátula.
+    feat = [shaped[g.pk] for g in games if g.featured and g.pk not in with_video][:max(0, HERO_SLIDES - len(slides))]
+    if not slides and len(feat) < 3:
+        extra = [shaped[g.pk] for g in sorted(games, key=lambda g: -g.discount_percent) if not g.featured]
+        feat += extra[:3 - len(feat)]
+    slides += [{**_slide(g), 'video': '', 'image': g['cover_url']} for g in feat]
 
     ranked = _ranked(games)
     deals = [shaped[g.pk] for g in sorted(games, key=lambda g: -g.discount_percent) if g.discount_percent > 0][:HOME_RAIL]

@@ -199,3 +199,48 @@ class PlusPlatformTests(TestCase):
         line = cart_lines([{'type': 'plan', 'id': self.ps5.pk, 'qty': 1}])[0]
         self.assertIn('PS5', line['titulo'])
         self.assertIn('PS5', line['order_title'])
+
+
+@override_settings(STORAGES=PLAIN_STORAGES, SECURE_SSL_REDIRECT=False)
+class HeroFeaturedTests(TestCase):
+    def _game(self, slug, featured=False):
+        return Juego.objects.create(title=slug.upper(), slug=slug, platform='PS5', genre='RPG', price_primary=2000,
+                                    price_secondary=1000, featured=featured)
+
+    def _slides(self):
+        snapshot.bump()
+        return self.client.get(reverse('store:home')).context['slides']
+
+    def _video(self, juego):
+        from apps.catalog.models import HeroVideo
+        return HeroVideo.objects.create(juego=juego, video='site/hero-videos/x.mp4')
+
+    def test_featured_without_video_joins_the_videos(self):
+        with_video = self._game('con-video', featured=True)
+        self._game('sin-video', featured=True)
+        self._game('normal')
+        self._video(with_video)
+        slides = self._slides()
+        self.assertEqual([s['title'] for s in slides], ['CON-VIDEO', 'SIN-VIDEO'])  # sin repetir ni rellenar
+        self.assertTrue(slides[0]['video'])
+        self.assertEqual(slides[1]['video'], '')
+
+    def test_carousel_is_capped(self):
+        self._video(self._game('con-video'))
+        for i in range(views.HERO_SLIDES + 3):
+            self._game(f'destacado-{i}', featured=True)
+        self.assertEqual(len(self._slides()), views.HERO_SLIDES)
+
+    def test_inactive_featured_is_not_shown(self):
+        self._video(self._game('con-video'))
+        oculto = self._game('oculto', featured=True)
+        Juego.objects.filter(pk=oculto.pk).update(active=False)
+        self.assertEqual([s['title'] for s in self._slides()], ['CON-VIDEO'])
+
+    def test_without_videos_still_fills_three_slides(self):
+        self._game('destacado', featured=True)
+        self._game('otro-1')
+        self._game('otro-2')
+        slides = self._slides()
+        self.assertEqual(len(slides), 3)
+        self.assertEqual(slides[0]['title'], 'DESTACADO')
