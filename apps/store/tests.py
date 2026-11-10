@@ -244,3 +244,18 @@ class HeroFeaturedTests(TestCase):
         slides = self._slides()
         self.assertEqual(len(slides), 3)
         self.assertEqual(slides[0]['title'], 'DESTACADO')
+
+    def test_featured_section_lists_all_featured(self):
+        with_video = self._game('con-video', featured=True)
+        self._game('sin-video', featured=True)
+        self._game('normal')
+        self._video(with_video)
+        snapshot.bump()
+        resp = self.client.get(reverse('store:home'))
+        self.assertEqual([g['title'] for g in resp.context['featured']], ['CON-VIDEO', 'SIN-VIDEO'])
+        self.assertContains(resp, '>Destacados</h2>')
+
+    def test_no_featured_section_when_none(self):
+        self._game('normal')
+        snapshot.bump()
+        self.assertNotContains(self.client.get(reverse('store:home')), '>Destacados</h2>')

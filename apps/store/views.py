@@ -147,6 +147,8 @@ def home(request):
         'slide0': slides[0] if slides else None,
         'slides_json': _json(slides),
         'deals': deals,
+        # todos los destacados, aunque ya salgan en el carrusel del hero
+        'featured': [shaped[g.pk] for g in games if g.featured][:HOME_RAIL],
         'coverflow': cf,
         'cf0': cf[0] if cf else None,
         'cf_json': _json(cf),
