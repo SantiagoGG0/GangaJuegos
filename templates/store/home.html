@@ -63,13 +63,17 @@
   </section>
 
   {% if featured %}
-  <section style="max-width:var(--maxW);width:100%;margin:0 auto;padding:0 var(--pad);display:flex;flex-direction:column;gap:16px">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
-      <h2 data-reveal="left" style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase;display:flex;align-items:center;gap:10px"><span style="width:6px;height:0.9em;background:#FCC602;transform:skewX(-14deg)"></span>Destacados</h2>
-      <a href="{% url 'store:catalog' %}" style="font-size:14px;font-weight:700;white-space:nowrap">Ver catálogo →</a>
-    </div>
-    <div data-reveal-stagger="1" class="gj-feat gj-noscroll">
-      {% for g in featured %}{% include "partials/game_card.html" %}{% endfor %}
+  <section style="max-width:var(--maxW);width:100%;margin:0 auto;padding:0 var(--pad)">
+    <div class="gj-feat-box">
+      <div class="gj-feat-head" data-reveal="rise">
+        <span class="gj-feat-kicker">★ Selección Ganga ★</span>
+        <h2 style="margin:0;font:italic 900 var(--h2)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">Destacados</h2>
+        <span style="font-size:14px;color:#C9D4E8">Los juegos que más recomendamos esta semana</span>
+      </div>
+      <div data-reveal-stagger="1" class="gj-feat gj-noscroll">
+        {% for g in featured %}{% include "partials/game_card.html" %}{% endfor %}
+      </div>
+      <a href="{% url 'store:catalog' %}" class="gj-feat-more">Ver todo el catálogo →</a>
     </div>
   </section>
   {% endif %}

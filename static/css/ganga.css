@@ -63,9 +63,29 @@ select option { color: #011E4F; background: #FCF8F3; }
 .gj-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 /* Home · Destacados: cuadrícula en escritorio, fila deslizable en móvil */
-.gj-feat { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--railCol), 1fr)); gap: 12px; }
+.gj-feat-box {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 20px;
+  padding: 28px var(--pad) 24px; border-radius: 16px; border: 1px solid rgba(252,198,2,.28);
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(252,139,1,.22), transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(252,60,0,.14), transparent 70%),
+    radial-gradient(40% 60% at 100% 100%, rgba(252,198,2,.12), transparent 70%),
+    linear-gradient(180deg, #0A2C66, #021A45);
+  box-shadow: 0 24px 60px -24px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.gj-feat-head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.gj-feat-kicker { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #FCC602; }
+.gj-feat { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; }
+.gj-feat > .hv-card { width: calc(var(--railCol) + 24px); box-shadow: 0 14px 30px -12px rgba(0,0,0,.65), 0 0 0 1px rgba(252,198,2,.18); }
+.gj-feat-more { font-size: 14px; font-weight: 800; color: #FCC602; padding: 10px 18px; border: 1px solid rgba(252,198,2,.4); border-radius: 999px; transition: background .2s, color .2s; }
+.gj-feat-more:hover { background: #FCC602; color: #011E4F; }
 @media (max-width: 899.98px) {
-  .gj-feat { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: var(--railCol); overflow-x: auto; margin: 0 calc(-1 * var(--pad)); padding: 4px var(--pad) 12px; scrollbar-width: none; }
+  .gj-feat-box { padding: 22px 0 18px; border-radius: 12px; gap: 16px; }
+  .gj-feat-head { padding: 0 16px; }
+  .gj-feat { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding: 4px 16px 12px; scrollbar-width: none; }
+  .gj-feat > .hv-card { width: var(--railCol); flex-shrink: 0; }
+  .gj-feat > .hv-card:first-child { margin-left: auto; }
+  .gj-feat > .hv-card:last-child { margin-right: auto; }
 }
 
 /* Home · banner de lanzamiento con cuenta regresiva */
