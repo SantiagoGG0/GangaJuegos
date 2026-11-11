@@ -281,6 +281,27 @@
     }
   })();
 
+  /* -------------------------------------- banner de lanzamiento (cuenta) */
+  (function () {
+    var box = $('[data-launch]'); if (!box) return;
+    var target = Date.parse(box.getAttribute('data-target')), count = $('[data-launch-count]', box);
+    if (!target || !count || count.hidden) return;
+    var nums = $$('[data-launch-n]', count), timer;
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function tick() {
+      var s = Math.max(0, Math.floor((target - Date.now()) / 1000));
+      var v = [Math.floor(s / 86400), Math.floor(s % 86400 / 3600), Math.floor(s % 3600 / 60), s % 60];
+      nums.forEach(function (el, i) { var t = pad(v[i]); if (el.textContent !== t) el.textContent = t; });
+      if (!s) {
+        clearInterval(timer);
+        hide(count);
+        $('[data-launch-kicker]', box).textContent = '¡Ya disponible!';
+      }
+    }
+    tick();
+    timer = setInterval(tick, 1000);
+  })();
+
   /* ------------------------------------------ primera visita: elegir país */
   (function () {
     var box = $('[data-country-picker]'); if (!box) return;

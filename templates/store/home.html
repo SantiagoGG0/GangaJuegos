@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <main data-page="1" data-screen-label="Home" style="display:flex;flex-direction:column;gap:var(--secGap);padding-bottom:var(--secGap)">
+  {% if launch %}{% include "partials/launch_banner.html" %}{% endif %}
   <section data-spotlight="1" style="position:relative;z-index:4;border-bottom:1px solid rgba(252,248,243,.1)">
     <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
       <div data-pixels="1" style="position:absolute;inset:0"></div>

@@ -67,3 +67,28 @@ select option { color: #011E4F; background: #FCF8F3; }
 @media (max-width: 899.98px) {
   .gj-feat { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: var(--railCol); overflow-x: auto; margin: 0 calc(-1 * var(--pad)); padding: 4px var(--pad) 12px; scrollbar-width: none; }
 }
+
+/* Home · banner de lanzamiento con cuenta regresiva */
+:root { --launchH: 30px; }
+@media (min-width: 900px) { :root { --launchH: 40px; } }
+.gj-launch { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 16px; border-radius: 12px; overflow: hidden; isolation: isolate; color: #FCF8F3; background: #0A2B66; border: 1px solid rgba(252,139,1,.5); box-shadow: 0 20px 50px -24px rgba(252,95,1,.55); }
+.gj-launch:hover { color: #FCF8F3; }
+.gj-launch:hover .gj-launch-btn { filter: brightness(1.08); transform: translateY(-1px); }
+.gj-launch-bg { position: absolute; inset: -20%; z-index: -2; background: center/cover no-repeat; filter: blur(28px) saturate(1.4); opacity: .55; }
+.gj-launch-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, rgba(1,30,79,.97) 20%, rgba(1,30,79,.72) 60%, rgba(201,48,0,.55)); }
+.gj-launch-cover { width: 76px; aspect-ratio: 3/4; height: auto; object-fit: cover; border-radius: 6px; box-shadow: 0 10px 30px -8px rgba(0,0,0,.7); flex-shrink: 0; }
+.gj-launch-text { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.gj-launch-count { display: flex; gap: 8px; flex: 1 1 100%; }
+.gj-launch-unit { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border-radius: 8px; background: rgba(1,20,55,.7); border: 1px solid rgba(252,248,243,.14); }
+.gj-launch-unit span { font: italic 900 28px/1 'Archivo', sans-serif; font-variant-numeric: tabular-nums; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gj-launch-unit small { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #A9B8D6; }
+.gj-launch-cta { display: flex; flex-direction: column; align-items: stretch; gap: 6px; flex: 1 1 100%; text-align: center; }
+.gj-launch-btn { display: flex; align-items: center; justify-content: center; height: 48px; padding: 0 22px; border-radius: 4px; background: var(--grad); color: #011E4F; font: italic 800 15px/1 'Archivo', sans-serif; text-transform: uppercase; transition: transform .15s, filter .15s; white-space: nowrap; }
+@media (min-width: 900px) {
+  .gj-launch { flex-wrap: nowrap; padding: 20px 24px; }
+  .gj-launch-cover { width: 104px; }
+  .gj-launch-count { flex: 0 0 auto; }
+  .gj-launch-unit { width: 78px; flex: 0 0 auto; padding: 12px 4px; }
+  .gj-launch-unit span { font-size: 36px; }
+  .gj-launch-cta { flex: 0 0 auto; align-items: flex-start; text-align: left; }
+}

@@ -1,0 +1,25 @@
+{# Banner de lanzamiento con cuenta regresiva (panel → Lanzamiento). La cuenta corre con JS (ganga-store.js) #}
+<section style="max-width:var(--maxW);width:100%;margin:0 auto calc(-1 * var(--secGap));padding:16px var(--pad) 0;position:relative;z-index:5">
+  <a href="{{ launch.url }}" class="gj-launch" data-launch="1" data-target="{{ launch.target }}" data-reveal="scale">
+    {% if launch.cover_url %}<div aria-hidden="true" class="gj-launch-bg" style="background-image:url('{{ launch.cover_url }}')"></div>{% endif %}
+    <div aria-hidden="true" class="gj-launch-shade"></div>
+    {% if launch.cover_url %}<img src="{{ launch.cover_url }}" alt="" class="gj-launch-cover" width="300" height="400">{% endif %}
+    <div class="gj-launch-text">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#FCC602">
+        <span style="width:8px;height:8px;border-radius:50%;background:#FC3C00;box-shadow:0 0 0 4px rgba(252,60,0,.25)"></span>
+        <span data-launch-kicker="1">{% if launch.released %}¡Ya disponible!{% else %}Lanzamiento · {{ launch.date_label }}{% endif %}</span>
+      </div>
+      <h2 style="margin:0;font:italic 900 var(--launchH)/1 'Archivo',sans-serif;font-stretch:112%;text-transform:uppercase">{{ launch.title }}</h2>
+      {% if launch.subtitle %}<p style="margin:0;font-size:14px;line-height:20px;color:#C9D4E8">{{ launch.subtitle }}</p>{% endif %}
+    </div>
+    <div class="gj-launch-count" data-launch-count="1" {% if launch.released %}hidden{% endif %} aria-label="Tiempo para el lanzamiento">
+      {% for n, label in launch.parts %}
+        <div class="gj-launch-unit"><span data-launch-n="{{ forloop.counter0 }}">{{ n|stringformat:"02d" }}</span><small>{{ label }}</small></div>
+      {% endfor %}
+    </div>
+    <div class="gj-launch-cta">
+      <span class="gj-launch-btn">Comprar ahora →</span>
+      <span style="font-size:12px;color:#C9D4E8">{{ launch.plat }} · desde <strong style="color:#FCF8F3">{{ launch.from }}</strong></span>
+    </div>
+  </a>
+</section>

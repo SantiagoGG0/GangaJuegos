@@ -173,8 +173,35 @@ def home(request):
         'home_faqs': _faq()[:5],
         'review_count': f'{settings_row.review_count:,}'.replace(',', '.'),
         'review_rating': f'{settings_row.review_rating}'.replace('.', ','),
+        'launch': _launch_banner(settings_row, shaped),
     }
     return render(request, 'store/home.html', ctx)
+
+
+LAUNCH_MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto',
+                'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+
+def _launch_banner(settings_row, shaped):
+    """Banner de lanzamiento con cuenta regresiva (panel → Lanzamiento). Solo
+    se muestra si está activo, tiene fecha y el juego sigue activo en la tienda.
+    Cuando llega la fecha cambia solo a "¡Ya disponible!"."""
+    from django.utils import timezone
+
+    if not (settings_row.launch_active and settings_row.launch_at and settings_row.launch_juego_id):
+        return None
+    g = shaped.get(settings_row.launch_juego_id)
+    if not g:
+        return None
+    at = timezone.localtime(settings_row.launch_at)
+    left = max(0, int((settings_row.launch_at - timezone.now()).total_seconds()))
+    return {
+        'title': settings_row.launch_title or g['title'], 'subtitle': settings_row.launch_subtitle,
+        'url': g['url'], 'cover_url': g['cover_url'], 'plat': g['plat'], 'from': g['from'],
+        'date_label': f'{at.day} de {LAUNCH_MESES[at.month - 1]}',
+        'target': settings_row.launch_at.isoformat(), 'released': left == 0,
+        'parts': [(left // 86400, 'Días'), (left % 86400 // 3600, 'Horas'), (left % 3600 // 60, 'Min'), (left % 60, 'Seg')],
+    }
 
 
 def _slide(g):

@@ -36,6 +36,7 @@ TABS = [
     ('caratulas', 'Carátulas', 'gsadmin:covers_manager', 'Imágenes'),
     ('carga', 'Carga masiva', 'gsadmin:products_bulk', 'Importar'),
     ('plus', 'PS Plus', 'gsadmin:dashboard_plus', 'Suscripciones'),
+    ('lanzamiento', 'Lanzamiento', 'gsadmin:dashboard_lanzamiento', 'Banner del home'),
     ('contacto', 'Contacto', 'gsadmin:dashboard_contacto', 'WhatsApp y redes'),
 ]
 
@@ -711,3 +712,46 @@ def tab_plus(request):
         } for pl in platforms],
     })
     return render(request, 'panel/plus.html', ctx)
+
+
+# ------------------------------------------------------------ Lanzamiento
+
+def tab_lanzamiento(request):
+    """Banner de lanzamiento con cuenta regresiva que se muestra arriba del home."""
+    from apps.catalog.models import SiteSettings
+
+    ctx = base_context(request, 'lanzamiento')
+    row = SiteSettings.load_fresh()
+    errors = {}
+    if request.method == 'POST':
+        p = request.POST
+        active = p.get('launch_active') == '1'
+        juego = Juego.objects.filter(pk=p.get('launch_juego') or 0).first()
+        at = None
+        raw_at = p.get('launch_at', '').strip()
+        if raw_at:
+            try:
+                at = timezone.make_aware(datetime.datetime.fromisoformat(raw_at))
+            except ValueError:
+                errors['launch_at'] = 'Fecha no válida.'
+        if active and not juego:
+            errors['launch_juego'] = 'Elige el juego del lanzamiento.'
+        if active and not raw_at:
+            errors['launch_at'] = 'Pon la fecha y hora del lanzamiento.'
+        row.launch_active, row.launch_juego = active, juego
+        row.launch_title = p.get('launch_title', '').strip()[:80]
+        row.launch_subtitle = p.get('launch_subtitle', '').strip()[:160]
+        row.launch_at = at if 'launch_at' not in errors else row.launch_at
+        if not errors:
+            row.save(update_fields=['launch_active', 'launch_juego', 'launch_title', 'launch_subtitle', 'launch_at'])
+            messages.success(request, 'Banner de lanzamiento guardado.' if active else 'Banner de lanzamiento oculto.')
+            return redirect('gsadmin:dashboard_lanzamiento')
+        messages.error(request, 'Revisa los campos marcados.')
+    at_local = timezone.localtime(row.launch_at) if row.launch_at else None
+    ctx.update({
+        'row': row, 'errors': errors,
+        'at_value': at_local.strftime('%Y-%m-%dT%H:%M') if at_local else '',
+        'games': Juego.objects.filter(active=True).order_by('title').only('pk', 'title', 'platform'),
+        'released': bool(row.launch_at and row.launch_at <= timezone.now()),
+    })
+    return render(request, 'panel/lanzamiento.html', ctx)

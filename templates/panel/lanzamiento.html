@@ -1,0 +1,44 @@
+{% extends "panel/shell.html" %}
+{% block panel %}
+<form method="post" data-screen-label="Panel · Lanzamiento" style="display:flex;flex-direction:column;gap:16px;margin:0;max-width:760px">
+  {% csrf_token %}
+  <div style="font-size:14px;line-height:21px;color:#4A5A78">Banner con cuenta regresiva que aparece arriba del todo en la página principal. Al hacer clic lleva a la ficha del juego para comprarlo. Cuando llega la fecha, el contador cambia solo a "¡Ya disponible!"{% if released %} <strong>(la fecha ya pasó: hoy se muestra como "¡Ya disponible!")</strong>{% endif %}.</div>
+
+  <div style="background:#fff;border:1px solid #E6DED2;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:16px">
+    <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;cursor:pointer">
+      <input type="checkbox" name="launch_active" value="1" {% if row.launch_active %}checked{% endif %} style="width:18px;height:18px">
+      Mostrar el banner en la página principal
+    </label>
+
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:800">Juego</span>
+      <select name="launch_juego" style="height:40px;max-width:520px;padding:0 10px;border:1px solid {% if errors.launch_juego %}#C93000{% else %}#E6DED2{% endif %};border-radius:4px;background:#FCF8F3;font-size:14px">
+        <option value="">— Elige un juego —</option>
+        {% for g in games %}<option value="{{ g.pk }}" {% if g.pk == row.launch_juego_id %}selected{% endif %}>{{ g.title }} · {{ g.platform }}</option>{% endfor %}
+      </select>
+      <span style="font-size:12px;color:{% if errors.launch_juego %}#9A2A00{% else %}#4A5A78{% endif %}">{{ errors.launch_juego|default:"Se usan su carátula, precio y enlace de compra." }}</span>
+    </label>
+
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:800">Fecha y hora de lanzamiento (hora de Colombia)</span>
+      <input type="datetime-local" name="launch_at" value="{{ at_value }}" style="height:40px;max-width:260px;padding:0 10px;border:1px solid {% if errors.launch_at %}#C93000{% else %}#E6DED2{% endif %};border-radius:4px;background:#FCF8F3;font-size:14px">
+      {% if errors.launch_at %}<span style="font-size:12px;color:#9A2A00">{{ errors.launch_at }}</span>{% endif %}
+    </label>
+
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:800">Título</span>
+      <input name="launch_title" value="{{ row.launch_title }}" maxlength="80" placeholder="Vacío = nombre del juego" style="height:40px;max-width:520px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#FCF8F3;font-size:14px">
+    </label>
+
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:800">Texto</span>
+      <input name="launch_subtitle" value="{{ row.launch_subtitle }}" maxlength="160" placeholder="Opcional, ej: Asegura tu copia y juega desde el primer día." style="height:40px;max-width:640px;padding:0 12px;border:1px solid #E6DED2;border-radius:4px;background:#FCF8F3;font-size:14px">
+    </label>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <button type="submit" style="height:44px;padding:0 20px;border:0;border-radius:4px;background:linear-gradient(90deg,#FC3C00,#FC8B01 60%,#FCC602);color:#011E4F;font:italic 800 14px/1 'Archivo',sans-serif;text-transform:uppercase;cursor:pointer">Guardar</button>
+    <a href="/" target="_blank" rel="noopener" style="font-size:13px;font-weight:700">Ver en la tienda ↗</a>
+  </div>
+</form>
+{% endblock %}

@@ -368,6 +368,16 @@ class SiteSettings(models.Model):
         help_text='Si está desactivado, el botón de PayPal no aparece en el carrito.',
     )
 
+    # Banner de lanzamiento con cuenta regresiva (home). Se edita en el panel → Lanzamiento.
+    launch_active = models.BooleanField('mostrar banner de lanzamiento', default=False)
+    launch_juego = models.ForeignKey(
+        'Juego', on_delete=models.SET_NULL, null=True, blank=True, related_name='+',
+        verbose_name='juego del lanzamiento',
+    )
+    launch_title = models.CharField('título del banner', max_length=80, blank=True)
+    launch_subtitle = models.CharField('texto del banner', max_length=160, blank=True)
+    launch_at = models.DateTimeField('fecha y hora de lanzamiento', null=True, blank=True)
+
     class Meta:
         verbose_name = 'configuración del sitio'
         verbose_name_plural = 'configuración del sitio'

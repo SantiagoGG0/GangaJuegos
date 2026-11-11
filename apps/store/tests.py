@@ -259,3 +259,54 @@ class HeroFeaturedTests(TestCase):
         self._game('normal')
         snapshot.bump()
         self.assertNotContains(self.client.get(reverse('store:home')), '>Destacados</h2>')
+
+
+@override_settings(STORAGES=PLAIN_STORAGES, SECURE_SSL_REDIRECT=False)
+class LaunchBannerTests(TestCase):
+    def setUp(self):
+        from apps.catalog.models import SiteSettings
+        self.juego = Juego.objects.create(title='Grand Theft Auto VI', slug='grand-theft-auto-vi', platform='PS5',
+                                          genre='Acción', price_primary=179900, price_secondary=129900)
+        self.row = SiteSettings.load_fresh()
+
+    def _set(self, **kw):
+        for k, v in kw.items():
+            setattr(self.row, k, v)
+        self.row.save()  # invalida la caché (señal)
+        return self.client.get(reverse('store:home'))
+
+    def test_banner_with_countdown_links_to_game(self):
+        import datetime
+        from django.utils import timezone
+        resp = self._set(launch_active=True, launch_juego=self.juego, launch_title='GTA VI',
+                         launch_at=timezone.now() + datetime.timedelta(days=8, hours=3))
+        launch = resp.context['launch']
+        self.assertFalse(launch['released'])
+        self.assertEqual(launch['parts'][0][0], 8)
+        self.assertContains(resp, 'data-launch-count')
+        self.assertContains(resp, 'href="/juego/grand-theft-auto-vi/" class="gj-launch"')
+
+    def test_after_release_says_available(self):
+        import datetime
+        from django.utils import timezone
+        resp = self._set(launch_active=True, launch_juego=self.juego, launch_at=timezone.now() - datetime.timedelta(hours=1))
+        self.assertTrue(resp.context['launch']['released'])
+        self.assertContains(resp, '¡Ya disponible!')
+
+    def test_hidden_when_inactive_or_game_hidden(self):
+        import datetime
+        from django.utils import timezone
+        at = timezone.now() + datetime.timedelta(days=2)
+        self.assertIsNone(self._set(launch_active=False, launch_juego=self.juego, launch_at=at).context['launch'])
+        Juego.objects.filter(pk=self.juego.pk).update(active=False)
+        self.assertIsNone(self._set(launch_active=True).context['launch'])
+
+    def test_migration_sets_gta6(self):
+        import importlib
+        from django.apps import apps as django_apps
+        mig = importlib.import_module('apps.catalog.migrations.0019_banner_gta6')
+        mig.forwards(django_apps, None)
+        self.row.refresh_from_db()
+        self.assertTrue(self.row.launch_active)
+        self.assertEqual(self.row.launch_juego_id, self.juego.pk)
+        self.assertEqual(self.row.launch_at, mig.LAUNCH_AT)

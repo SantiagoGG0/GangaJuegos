@@ -384,3 +384,33 @@ class PlusPricesPanelTests(TestCase):
         self.assertContains(resp, 'no válidos')
         self.assertFalse(PlusPlan.objects.filter(platform='PS4').exists())
         self.assertEqual(PlusPlan.objects.get(platform='PS5', tier='Extra', months=12).price, 69000)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, STORAGES={
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+})
+class LaunchPanelTests(TestCase):
+    def setUp(self):
+        self.client.force_login(get_user_model().objects.create_superuser('a@a.co', 'x', nombre='Admin'))
+        self.url = reverse('gsadmin:dashboard_lanzamiento')
+        self.juego = Juego.objects.create(title='GTA VI', slug='gta-vi', platform='PS5', genre='Acción',
+                                          price_primary=2000, price_secondary=1000)
+
+    def test_save_banner(self):
+        from apps.catalog.models import SiteSettings
+        self.assertContains(self.client.get(self.url), 'Mostrar el banner')
+        resp = self.client.post(self.url, {'launch_active': '1', 'launch_juego': self.juego.pk,
+                                           'launch_at': '2026-11-19T00:00', 'launch_title': 'GTA VI', 'launch_subtitle': 'Ya casi'})
+        self.assertRedirects(resp, self.url)
+        row = SiteSettings.load_fresh()
+        self.assertTrue(row.launch_active)
+        self.assertEqual(row.launch_juego_id, self.juego.pk)
+        from django.utils import timezone
+        self.assertEqual(timezone.localtime(row.launch_at).strftime('%Y-%m-%d %H:%M'), '2026-11-19 00:00')
+
+    def test_active_requires_game_and_date(self):
+        resp = self.client.post(self.url, {'launch_active': '1', 'launch_juego': '', 'launch_at': ''})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Elige el juego')
+        self.assertContains(resp, 'Pon la fecha')
